@@ -69,7 +69,7 @@ while (true)
         {
             webcam.Read(frame);
             Cv2.ImShow("Webcam", frame);
-            if (Cv2.WaitKey(16) < 0)
+            if (Cv2.WaitKey(16) >= 0)
                 break;
         }
         Cv2.DestroyAllWindows();
