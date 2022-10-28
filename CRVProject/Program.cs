@@ -3,7 +3,7 @@ using CRVProject;
 
 while (true)
 {
-    int ind = Util.Select("Start a program:", "Otsu", "HUE Shift", "Show Webcam", "Write Text", "Exit");
+    int ind = Util.SelectGUI(false, "Otsu", "HUE Shift", "Show Webcam", "Write Text", "Show Grid Window", "Draw Histogram", "Zoomable Window", "Exit");
     Console.WriteLine("Seleced option " + ind);
 
     // Otsu
@@ -120,6 +120,54 @@ while (true)
         Cv2.WaitKey();
         Cv2.DestroyAllWindows();
         image.Dispose();
+    }
+    // Show Grid Window
+    else if(ind == 4)
+    {
+        using Mat image = Cv2.ImRead("Image.jpg");
+        using Mat gray = new Mat();
+        Cv2.CvtColor(image, gray, ColorConversionCodes.RGB2GRAY);
+        using Mat bin = new Mat();
+        Cv2.Threshold(gray, bin, 0, 255, ThresholdTypes.Otsu);
+        using Mat canny = new Mat();
+        Cv2.Canny(bin, canny, 100, 200);
+        using Mat graph1 = Util.DrawHistogram(image);
+        using Mat graph2 = Util.DrawHistogram(gray);
+
+        ImageGridWindow wnd = new ImageGridWindow(2, 3);
+        wnd.SetImage(0, 0, image);
+        wnd.SetImage(1, 0, gray);
+        wnd.SetImage(0, 1, graph1);
+        wnd.SetImage(1, 1, graph2);
+        wnd.SetImage(0, 2, bin);
+        wnd.SetImage(1, 2, canny);
+        wnd.AddTrackbar("Brightness", -255, 255);
+        wnd.OnTrackbarValueChanged += (wnd, name, value) =>
+        {
+            using Mat image2 = image + new Scalar(value, value, value);
+            using Mat graph12 = Util.DrawHistogram(image2);
+            wnd.SetImage(0, 0, image2);
+            wnd.SetImage(0, 1, graph12);
+            if (value == -255)
+                wnd.SetImage(0, 2, null);
+        };
+        wnd.Run();
+    }
+    // Draw Histogramm
+    else if(ind == 5)
+    {
+        using Mat image = new Mat("Image.jpg");
+        using Mat graph = Util.DrawHistogram(image);
+        Cv2.ImShow("histogram", graph);
+        Cv2.WaitKey();
+        Cv2.DestroyAllWindows();
+    }
+    // Zoomable Window
+    else if(ind == 6)
+    {
+        using Mat image = new Mat("Image.jpg");
+        ZoomableWindow wnd = new ZoomableWindow(image);
+        wnd.Show();
     }
     // Exit
     else
