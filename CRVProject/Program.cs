@@ -1,5 +1,5 @@
 ﻿using OpenCvSharp; //OpenCv Library
-using CRVProject;
+using CRVProject;  //Included automatically by Visual Studio
 
 while (true)
 {
