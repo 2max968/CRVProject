@@ -1,4 +1,4 @@
-﻿using OpenCvSharp;
+﻿using OpenCvSharp; //OpenCv Library
 using CRVProject;
 
 while (true)
