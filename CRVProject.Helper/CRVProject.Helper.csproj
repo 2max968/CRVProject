@@ -11,4 +11,10 @@
       <PackageReference Include="OpenCvSharp4" Version="4.6.0.20220608" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="GLSharp">
+        <HintPath>..\GLSharp.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

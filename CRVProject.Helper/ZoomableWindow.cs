@@ -18,7 +18,7 @@ namespace CRVProject.Helper
 
         public void Show()
         {
-            Cv2.NamedWindow(title);
+            Cv2.NamedWindow(title, WindowFlags.OpenGL);
             Cv2.ResizeWindow(title, 800, 600);
             Cv2.SetMouseCallback(title, mouseCallback);
 
@@ -35,10 +35,15 @@ namespace CRVProject.Helper
                 return;
 
             var rect = Cv2.GetWindowImageRect(title);
-            Mat r = new Mat(rect.Width, rect.Height, image.Type());
-            Cv2.Transform(image, r, getScaleMatrix(zoom));
-
-            Cv2.ImShow(title, r);
+            using Mat tmp = new Mat();
+            float scaleX = (float)rect.Width / image.Width;
+            float scaleY = (float)rect.Height / image.Height;
+            float scale = MathF.Min(scaleX, scaleY);
+            Cv2.Resize(image, tmp, new Size(image.Width * scale, image.Height * scale));
+            Rect targetRect = new Rect((rect.Width - tmp.Width) / 2, (rect.Height - tmp.Height) / 2, tmp.Width, tmp.Height);
+            using Mat window = new Mat(rect.Width, rect.Height, tmp.Type());
+            tmp.CopyTo(window[targetRect]);
+            Cv2.ImShow(title, window);
         }
 
         void mouseCallback(MouseEventTypes @event, int x, int y, MouseEventFlags flags, IntPtr userData)
@@ -47,14 +52,6 @@ namespace CRVProject.Helper
             {
                 zoom *= MathF.Pow(1.1f, y);
             }
-        }
-
-        static Mat getScaleMatrix(float scale)
-        {
-            Mat m = new Mat(3, 3, MatType.CV_32SC1);
-            m.SetIdentity(new Scalar(scale));
-            m.Set<float>(2, 2, 1);
-            return m;
         }
     }
 }

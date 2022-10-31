@@ -22,6 +22,7 @@ namespace CRVProject.Helper
         List<Trackbar> trackbars = new List<Trackbar>();
         public event TrackbarValueChangedEvent? OnTrackbarValueChanged;
         public event TickEvent? OnTick;
+        private Rect[]? imageRectangles;
 
         public ImageGridWindow(int columns, int rows)
         {
@@ -55,10 +56,10 @@ namespace CRVProject.Helper
                 Cv2.SetTrackbarMax(tb.Name, title, tb.Max);
             }
             render();
-            Cv2.SetMouseCallback(title, mouseCallback);
             while(Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) != 0)
             {
                 render();
+                Cv2.SetMouseCallback(title, mouseCallback);
                 OnTick?.Invoke(this);
                 Cv2.WaitKey(100);
             }
@@ -102,6 +103,7 @@ namespace CRVProject.Helper
             Mat outMat = new Mat(rect.Height, rect.Width, MatType.CV_8UC3);
             Size tileSize = new Size(rect.Width / Columns, rect.Height / Rows);
 
+            imageRectangles = new Rect[images.Length];
             outMat.SetTo(BackgroundColor);
             for(int y = 0; y < Rows; y++)
             {
@@ -113,6 +115,8 @@ namespace CRVProject.Helper
                         tileSize.Height - Margin);
 
                     Cv2.Rectangle(outMat, tileRect, ForegroundColor, -1);
+                    
+                    imageRectangles[y * Columns + x] = tileRect;
 
                     Mat? img = images[y * Columns + x];
                     if (img != null && !img.Empty())
@@ -164,7 +168,16 @@ namespace CRVProject.Helper
 
         void mouseCallback(MouseEventTypes @event, int x, int y, MouseEventFlags flags, IntPtr userData)
         {
-            
+            if (@event == MouseEventTypes.LButtonUp && imageRectangles != null)
+            {
+                for (int i = 0; i < imageRectangles.Length; i++)
+                {
+                    if (imageRectangles[i].Contains(x, y))
+                    {
+                        Cv2.ImShow($"{title} {i}", images[i]);
+                    }
+                }
+            }
         }
 
         public void AddTrackbar(string name , int min, int max)

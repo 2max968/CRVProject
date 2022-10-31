@@ -32,7 +32,7 @@ public class Locator : IDisposable
         Cv2.CvtColor(image, hsv, ColorConversionCodes.RGB2HSV);
         BinarizedImage = new Mat();
         Cv2.InRange(hsv,
-            new Scalar(hueMax, 150, 100),
+            new Scalar(hueMin, 150, 100),
             new Scalar(hueMax, 256, 256),
             BinarizedImage);
         
@@ -43,10 +43,10 @@ public class Locator : IDisposable
         Cv2.Erode(BinarizedImage, BinarizedImage, kernel);
         
         // Detect Contours in binarized image
-        using var contourImage = new Mat();
-        Cv2.Canny(BinarizedImage, contourImage, 127, 256);
+        //using var contourImage = new Mat();
+        //Cv2.Canny(BinarizedImage, contourImage, 127, 256);
 
-        var contours = Cv2.FindContoursAsArray(contourImage, RetrievalModes.List, ContourApproximationModes.ApproxNone);
+        var contours = Cv2.FindContoursAsArray(/*contourImage*/BinarizedImage, RetrievalModes.List, ContourApproximationModes.ApproxNone);
         foreach (var contour in contours)
         {
             var conLength = Cv2.ArcLength(contour, true);
