@@ -95,7 +95,7 @@ namespace CRVProject.Helper
             float[] data = CalcHist(image, channel);
             return DrawHistogram(data);
         }
-
+        
         public static int SelectGUI(bool canCancel, params string[] options)
         {
             Size btnSize = new Size(200, 32);
@@ -197,5 +197,7 @@ namespace CRVProject.Helper
 
             throw new ArgumentException($"Can't parse {htmlColor}", "htmlColor");
         }
+
+        public static string[] SupportedImageTypes => new[] {"bmp", "pbm", "pgm", "ppm", "sr", "ras", "jpeg", "jpg", "jpe", "jp2", "tiff", "tif", "png" };
     }
 }

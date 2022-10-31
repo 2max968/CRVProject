@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRVProject.Demo", "CRVProje
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRVProject.Helper", "CRVProject.Helper\CRVProject.Helper.csproj", "{5B039321-37A4-4320-A4AA-2F9FADBB747F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRVProject.Ortsschild", "CRVProject.Ortsschild\CRVProject.Ortsschild.csproj", "{1E5283BA-B18E-417C-8B09-24DD8BDC116A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5B039321-37A4-4320-A4AA-2F9FADBB747F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B039321-37A4-4320-A4AA-2F9FADBB747F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B039321-37A4-4320-A4AA-2F9FADBB747F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E5283BA-B18E-417C-8B09-24DD8BDC116A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E5283BA-B18E-417C-8B09-24DD8BDC116A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E5283BA-B18E-417C-8B09-24DD8BDC116A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E5283BA-B18E-417C-8B09-24DD8BDC116A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
