@@ -32,7 +32,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected=".NET Project.CRVProject.Demo">
+  <component name="RunManager" selected=".NET Project.CRVProject.Ortsschild">
     <configuration name="CRVProject.Demo" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="$PROJECT_DIR$/CRVProject.Demo/bin/Debug/net6.0/CRVProject.Demo.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -101,7 +101,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1667222166920</updated>
-      <workItem from="1667222193275" duration="8962000" />
+      <workItem from="1667222193275" duration="11350000" />
     </task>
     <servers />
   </component>

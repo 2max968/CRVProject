@@ -21,7 +21,7 @@ namespace CRVProject.Helper
             Cv2.NamedWindow(title, WindowFlags.OpenGL);
             Cv2.ResizeWindow(title, 800, 600);
             Cv2.SetMouseCallback(title, mouseCallback);
-
+            
             while(Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) != 0)
             {
                 render();
