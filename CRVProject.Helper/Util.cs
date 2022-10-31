@@ -1,13 +1,7 @@
-﻿using OpenCvSharp;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
+using OpenCvSharp;
 
-namespace CRVProject
+namespace CRVProject.Helper
 {
     public class Util
     {
@@ -50,18 +44,18 @@ namespace CRVProject
                 null,
                 hist,
                 1,
-                new int[] { 255 },
-                new Rangef[] { new Rangef(0, 255) });
+                new int[] { 256 },
+                new Rangef[] { new Rangef(0, 256) });
 
-            float[] data = new float[255];
-            for (int i = 0; i < 255; i++)
+            float[] data = new float[256];
+            for (int i = 0; i < 256; i++)
                 data[i] = hist.At<float>(i);
             return data;
         }
 
         public static Mat DrawHistogram(float[] data, float max = float.NaN)
         {
-            Mat graph = new Mat(255, 255, MatType.CV_8UC1);
+            Mat graph = new Mat(256, 256, MatType.CV_8UC1);
             graph.SetTo(new Scalar(0));
             if(!float.IsNormal(max))
                 max = data.Max();
