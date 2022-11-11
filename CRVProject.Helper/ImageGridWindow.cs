@@ -174,6 +174,8 @@ namespace CRVProject.Helper
                 {
                     if (imageRectangles[i].Contains(x, y))
                     {
+                        Cv2.NamedWindow($"{title} {i}", WindowFlags.Normal);
+                        Cv2.ResizeWindow($"{title} {i}", new Size(800, 600));
                         Cv2.ImShow($"{title} {i}", images[i]);
                     }
                 }

@@ -26,9 +26,13 @@ while (true)
     
     locator.RunLocator();
 
+    if(locator.CutoutImage != null)
+        Cv2.ImWrite("cutout.png", locator.CutoutImage);
+
     ImageGridWindow wnd = new ImageGridWindow(3, 1 + (locator.Ortsschilder.Count + 2 / 3));
     wnd.SetImage(0, 0, image);
     wnd.SetImage(1,0,locator.BinarizedImage);
+    wnd.SetImage(2, 0, locator.Corners);
     for (int i = 0; i < locator.Ortsschilder.Count; i++)
         wnd.SetImage(i % 3, i / 3 + 1, locator.Ortsschilder[i]);
     wnd.Run();
