@@ -198,6 +198,55 @@ namespace CRVProject.Helper
             throw new ArgumentException($"Can't parse {htmlColor}", "htmlColor");
         }
 
+        public static void PixelInfoWindow(Mat image, bool showHsv = true)
+        {
+            int headHeight = 32;
+            using Mat hsv = new Mat();
+            string title = Guid.NewGuid().ToString();
+
+            using Mat clone = new Mat();
+            Cv2.Resize(image, clone, new Size(800, 600), 0, 0, InterpolationFlags.Cubic);
+            if (showHsv)
+                Cv2.CvtColor(clone, hsv, ColorConversionCodes.RGB2HSV);
+
+            using Mat bgr = new Mat(clone.Rows + headHeight, clone.Cols, MatType.CV_8UC3);
+
+            Cv2.ImShow(title, bgr);
+            Cv2.SetMouseCallback(title, (@event, x, y, flags, userData) =>
+            {
+                int mX = x;
+                int mY = y - headHeight;
+                if (mX > 0 && mY > 0 && mX < clone.Cols && mY < clone.Rows)
+                {
+                    Vec3b rgbVals = clone.Get<Vec3b>(y - headHeight, x);
+                    string line1 = $"RGB: [{rgbVals.Item0}, {rgbVals.Item1}, {rgbVals.Item2}]";
+                    string line2 = "";
+                    if (showHsv)
+                    {
+                        Vec3b hsvValues = hsv.Get<Vec3b>(y - headHeight, x);
+                        line2 = $"HSV: [{hsvValues.Item0}, {hsvValues.Item1}, {hsvValues.Item2}]";
+                    }
+                    clone.CopyTo(bgr[new Rect(0, headHeight, clone.Cols, clone.Rows)]);
+                    Cv2.Rectangle(bgr, new Rect(0, 0, clone.Cols, headHeight), new Scalar(0, 0, 0), -1);
+                    Cv2.PutText(bgr, line1, new Point(32, 12), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
+                    Cv2.PutText(bgr, line2, new Point(32, 16 + 12), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
+                    Cv2.Rectangle(bgr, new Rect(4, 4, 24, 24), new Scalar(rgbVals.Item0, rgbVals.Item1, rgbVals.Item2), -1);
+                    Cv2.Rectangle(bgr, new Rect(4, 4, 24, 24), new Scalar(255, 255, 255), 1);
+                    Cv2.ImShow(title, bgr);
+
+                    if(@event == MouseEventTypes.LButtonDown)
+                    {
+                        Console.WriteLine($"{line1}; {line2}");
+                    }
+                }
+            }, IntPtr.Zero);
+
+            while(Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) != 0)
+            {
+                Cv2.WaitKey(100);
+            }
+        }
+
         public static string[] SupportedImageTypes => new[] {"bmp", "pbm", "pgm", "ppm", "sr", "ras", "jpeg", "jpg", "jpe", "jp2", "tiff", "tif", "png" };
     }
 }

@@ -1,6 +1,9 @@
 ﻿using CRVProject.Ortsschild;
 using CRVProject.Helper;
 using OpenCvSharp;
+using System.Diagnostics;
+
+Configuration.LoadConfiguration();
 
 DirectoryInfo imageDirectory = new DirectoryInfo("Images");
 if (!imageDirectory.Exists)
@@ -23,7 +26,8 @@ while (true)
 
     using var image = Cv2.ImRead(images[selectedImage].FullName);
     using var locator = new Locator(image);
-    
+    Util.PixelInfoWindow(image);
+
     locator.RunLocator();
 
     if(locator.CutoutImage != null)

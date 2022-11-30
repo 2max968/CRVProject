@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
       <PackageReference Include="OpenCvSharp4" Version="4.6.0.20220608" />
     </ItemGroup>
 
@@ -15,6 +16,12 @@
       <Reference Include="GLSharp">
         <HintPath>..\GLSharp.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Config.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

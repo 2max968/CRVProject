@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using CRVProject.Helper;
 using OpenCvSharp;
 
 namespace CRVProject.Ortsschild;
@@ -34,9 +35,11 @@ public class Locator : IDisposable
         int hueMax = Huevalue + HueTolerance;
         using Mat hsv = new Mat();
         Cv2.CvtColor(image, hsv, ColorConversionCodes.RGB2HSV);
+        var meanValues = Cv2.Mean(hsv);
+        double minValue = meanValues.Val3 * Configuration.Instance.Locator.Brightness;
         BinarizedImage = new Mat();
         Cv2.InRange(hsv,
-            new Scalar(hueMin, 150, 100),
+            new Scalar(hueMin, 150, minValue),
             new Scalar(hueMax, 256, 256),
             BinarizedImage);
         CannyImage = new Mat();
