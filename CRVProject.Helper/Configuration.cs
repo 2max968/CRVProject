@@ -32,7 +32,7 @@ namespace CRVProject.Helper
 
     public class LocatorConfiguration
     {
-        public double HueValue = 90;
+        public double HueValue = 20;
         public double HueTolerance = 10;
         public double AreaThreshhold = 0.0002f;
         public double DilationErotionSize = 0.01f;

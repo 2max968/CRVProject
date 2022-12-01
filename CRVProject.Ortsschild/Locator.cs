@@ -8,8 +8,6 @@ namespace CRVProject.Ortsschild;
 public class Locator : IDisposable
 {
     private Mat image;
-    public int Huevalue = 90;
-    public int HueTolerance = 10;
     public float AreaThreshhold = 0.0002f;
     public float DilationErotionSize = 0.01f;
     public List<Mat> Ortsschilder { get; private set; } = new List<Mat>();
@@ -25,16 +23,16 @@ public class Locator : IDisposable
         this.image = image;
     }
 
-    public void RunLocator()
+    public void Binarize()
     {
-        Stopwatch stp = new Stopwatch();
-        stp.Start();
-        
+        double hue = Configuration.Instance.Locator.HueValue;
+        double hueTolerance = Configuration.Instance.Locator.HueTolerance;
+
         // Binarize image to filter all yellow areas
-        int hueMin = Huevalue - HueTolerance;
-        int hueMax = Huevalue + HueTolerance;
+        double hueMin = hue - hueTolerance;
+        double hueMax = hue + hueTolerance;
         using Mat hsv = new Mat();
-        Cv2.CvtColor(image, hsv, ColorConversionCodes.RGB2HSV);
+        Cv2.CvtColor(image, hsv, ColorConversionCodes.BGR2HSV);
         var meanValues = Cv2.Mean(hsv);
         double minValue = meanValues.Val3 * Configuration.Instance.Locator.Brightness;
         BinarizedImage = new Mat();
@@ -42,6 +40,16 @@ public class Locator : IDisposable
             new Scalar(hueMin, 150, minValue),
             new Scalar(hueMax, 256, 256),
             BinarizedImage);
+    }
+
+    public void RunLocator()
+    {
+        Stopwatch stp = new Stopwatch();
+        stp.Start();
+
+        if (BinarizedImage == null)
+            Binarize();
+        
         CannyImage = new Mat();
         Cv2.Canny(BinarizedImage, CannyImage, 127, 128);
         

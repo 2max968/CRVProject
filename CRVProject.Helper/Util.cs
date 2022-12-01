@@ -207,7 +207,7 @@ namespace CRVProject.Helper
             using Mat clone = new Mat();
             Cv2.Resize(image, clone, new Size(800, 600), 0, 0, InterpolationFlags.Cubic);
             if (showHsv)
-                Cv2.CvtColor(clone, hsv, ColorConversionCodes.RGB2HSV);
+                Cv2.CvtColor(clone, hsv, ColorConversionCodes.BGR2HSV);
 
             using Mat bgr = new Mat(clone.Rows + headHeight, clone.Cols, MatType.CV_8UC3);
 
