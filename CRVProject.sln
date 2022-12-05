@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CRVProject.Helper", "CRVPro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CRVProject.Ortsschild", "CRVProject.Ortsschild\CRVProject.Ortsschild.csproj", "{1E5283BA-B18E-417C-8B09-24DD8BDC116A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZoomableWindow", "ZoomableWindow\ZoomableWindow.csproj", "{54FECC18-EAFB-44BC-84DA-6D5D40256DE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZoomableWindow", "ZoomableWindow\ZoomableWindow.csproj", "{54FECC18-EAFB-44BC-84DA-6D5D40256DE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRVProject.Ortsschild.WinForms", "CRVProject.Ortsschild.WinForms\CRVProject.Ortsschild.WinForms.csproj", "{DFEAC675-7566-499B-AB04-2F5CB5C0D37F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{54FECC18-EAFB-44BC-84DA-6D5D40256DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54FECC18-EAFB-44BC-84DA-6D5D40256DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54FECC18-EAFB-44BC-84DA-6D5D40256DE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFEAC675-7566-499B-AB04-2F5CB5C0D37F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFEAC675-7566-499B-AB04-2F5CB5C0D37F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFEAC675-7566-499B-AB04-2F5CB5C0D37F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFEAC675-7566-499B-AB04-2F5CB5C0D37F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
