@@ -129,11 +129,12 @@
             // bntPlayPause
             // 
             this.bntPlayPause.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.bntPlayPause.Image = global::CRVProject.Ortsschild.WinForms.Properties.Resources.control_pause_blue;
+            this.bntPlayPause.Image = global::CRVProject.Ortsschild.WinForms.Properties.Resources.control_play_blue;
             this.bntPlayPause.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.bntPlayPause.Name = "bntPlayPause";
             this.bntPlayPause.Size = new System.Drawing.Size(23, 22);
             this.bntPlayPause.Text = "Play/Pause";
+            this.bntPlayPause.Click += new System.EventHandler(this.bntPlayPause_Click);
             // 
             // btnBackSecond
             // 
