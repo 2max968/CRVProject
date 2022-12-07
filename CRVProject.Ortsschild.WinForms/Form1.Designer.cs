@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -46,6 +47,8 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblImageInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.pbPlayback = new System.Windows.Forms.ToolStripProgressBar();
+            this.lvSchilder = new System.Windows.Forms.ListView();
+            this.imgSchilder = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -188,8 +191,9 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.lvSchilder);
             this.splitContainer1.Panel2.Controls.Add(this.propertyGrid1);
-            this.splitContainer1.Size = new System.Drawing.Size(834, 482);
+            this.splitContainer1.Size = new System.Drawing.Size(834, 460);
             this.splitContainer1.SplitterDistance = 566;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -198,18 +202,19 @@
             this.pb.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pb.Location = new System.Drawing.Point(0, 0);
             this.pb.Name = "pb";
-            this.pb.Size = new System.Drawing.Size(566, 482);
+            this.pb.Size = new System.Drawing.Size(566, 460);
             this.pb.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pb.TabIndex = 0;
             this.pb.TabStop = false;
             // 
             // propertyGrid1
             // 
-            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Top;
             this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(264, 482);
+            this.propertyGrid1.Size = new System.Drawing.Size(264, 213);
             this.propertyGrid1.TabIndex = 0;
+            this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
             // 
             // statusStrip1
             // 
@@ -233,14 +238,31 @@
             this.pbPlayback.Name = "pbPlayback";
             this.pbPlayback.Size = new System.Drawing.Size(300, 16);
             // 
+            // lvSchilder
+            // 
+            this.lvSchilder.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lvSchilder.LargeImageList = this.imgSchilder;
+            this.lvSchilder.Location = new System.Drawing.Point(0, 213);
+            this.lvSchilder.Name = "lvSchilder";
+            this.lvSchilder.Size = new System.Drawing.Size(264, 247);
+            this.lvSchilder.SmallImageList = this.imgSchilder;
+            this.lvSchilder.TabIndex = 1;
+            this.lvSchilder.UseCompatibleStateImageBehavior = false;
+            // 
+            // imgSchilder
+            // 
+            this.imgSchilder.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imgSchilder.ImageSize = new System.Drawing.Size(200, 200);
+            this.imgSchilder.TransparentColor = System.Drawing.Color.Transparent;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 507);
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.statusStrip1);
             this.Name = "Form1";
             this.Text = "9";
             this.toolStrip1.ResumeLayout(false);
@@ -277,5 +299,7 @@
         private ToolStripButton btnOpen;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripProgressBar pbPlayback;
+        private ListView lvSchilder;
+        private ImageList imgSchilder;
     }
 }

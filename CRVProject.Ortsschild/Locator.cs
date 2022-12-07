@@ -89,7 +89,7 @@ public class Locator : IDisposable
                 Ortsschilder.Add(output);
 
                 //cutoutContour(contour);
-                var cornerRoi = Cv2.BoundingRect(contour);
+                /*var cornerRoi = Cv2.BoundingRect(contour);
                 int expand = cornerRoi.Height / 5;
                 cornerRoi.X -= expand / 2;
                 cornerRoi.Y -= expand / 2;
@@ -102,7 +102,7 @@ public class Locator : IDisposable
                     Cv2.Line(Corners, line.P1, line.P2, new Scalar(0, 255, 0));
                 Cv2.Ellipse(Corners, new Point(10, 10), new Size(4, 4), 0, 0, 360, new Scalar(0, 0, 255));
                 foreach (var point in rectIn)
-                    Cv2.Ellipse(Corners, point.ToPoint(), new Size(4, 4), 0, 0, 360, new Scalar(0, 0, 255));
+                    Cv2.Ellipse(Corners, point.ToPoint(), new Size(4, 4), 0, 0, 360, new Scalar(0, 0, 255));*/
             }
         }
     }

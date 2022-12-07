@@ -48,29 +48,29 @@ namespace CRVProject.Ortsschild.WinForms
             var hParent = GetParent(hWnd);
             ShowWindow(hParent, 0);
             SetParent(hWnd, pb.Handle);
+            propertyGrid1.SelectedObject = CRVProject.Helper.Configuration.Instance.Locator;
         }
 
         void openImage()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = $"Files|" + String.Join(';', CRVProject.Helper.Util.SupportedImageTypes.Select(str => $"*.{str}")) + ";*.mp4";
+            var ofd = new FileSelector();
             if(ofd.ShowDialog() == DialogResult.OK)
             {
                 video?.Dispose();
                 image?.Dispose();
                 video = null;
                 image = null;
-                if(ofd.FileName.ToLower().EndsWith(".mp4"))
+                if(ofd.SelectedPath.ToLower().EndsWith(".mp4"))
                 {
                     video = new VideoCapture();
-                    video.Open(ofd.FileName);
+                    video.Open(ofd.SelectedPath);
                     pbPlayback.Visible = true;
                     pbPlayback.Maximum = video.FrameCount;
                     pbPlayback.Value = 0;
                 }
                 else
                 {
-                    image = Cv2.ImRead(ofd.FileName);
+                    image = Cv2.ImRead(ofd.SelectedPath);
                     pbPlayback.Visible = false;
                 }
 
@@ -110,7 +110,7 @@ namespace CRVProject.Ortsschild.WinForms
                 //lblImageInfo.Text = $"{frame.Width}x{frame.Height}; Frame {videoPosition}/{video.FrameCount}; FPS: {video.Fps}";
                 //pbPlayback.Value = videoPosition;
             }
-            else if(image is not null)
+            else if (image is not null)
             {
                 frame = image.Clone();
                 //lblImageInfo.Text = $"{frame.Width}x{frame.Height}";
@@ -129,23 +129,23 @@ namespace CRVProject.Ortsschild.WinForms
             var outputSize = pb.Size;
             Cv2.ResizeWindow(cvTitle, outputSize.Width, outputSize.Height);
             dispMat(frame);
-            /*pb.Image?.Dispose();
-            pb.Image = null;
             if (viewMode == ViewMode.Original)
-                pb.Image = ImageConverter.Mat2Bitmap(frame);
+                dispMat(frame);
             else if (viewMode == ViewMode.Binarized)
-                pb.Image = ImageConverter.Mat2Bitmap(locator.BinarizedImage ?? new Mat());
+                dispMat(locator.BinarizedImage);
             else if(viewMode == ViewMode.Regions)
             {
                 using Mat gray = new Mat();
+                using Mat grayInv = new Mat();
                 Cv2.CvtColor(frame, gray, ColorConversionCodes.BGR2GRAY);
-                using Mat red = gray * (255 - locator.BinarizedImage);
+                Cv2.BitwiseNot(gray, grayInv);
+                using Mat red = grayInv;
                 using Mat green = gray * (locator.BinarizedImage);
                 using Mat blue = new Mat(gray.Width, gray.Height, MatType.CV_8UC1);
                 using Mat rgb = new Mat();
-                Cv2.Merge(new[] { red, green, blue }, rgb);
-                pb.Image = ImageConverter.Mat2Bitmap(rgb);
-            }*/
+                Cv2.Merge(new[ ] { red, green, blue }, rgb);
+                dispMat(rgb);
+            }
         }
 
         private void btnOriginal_Click(object sender, EventArgs e)
@@ -241,6 +241,11 @@ namespace CRVProject.Ortsschild.WinForms
             }
 
             videoThread = null;
+        }
+
+        private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            showImage();
         }
     }
 

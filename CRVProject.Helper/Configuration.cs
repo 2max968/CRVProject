@@ -9,8 +9,8 @@ namespace CRVProject.Helper
     public class Configuration
     {
         public static Configuration Instance = new Configuration();
-        public LocatorConfiguration Locator = new LocatorConfiguration();
-        public RecognitionConfiguration Recognition = new RecognitionConfiguration();
+        public LocatorConfiguration Locator { get; set; } = new LocatorConfiguration();
+        public RecognitionConfiguration Recognition { get; set; } = new RecognitionConfiguration();
 
         public static void LoadConfiguration(string path = "Config.json")
         {
@@ -32,13 +32,13 @@ namespace CRVProject.Helper
 
     public class LocatorConfiguration
     {
-        public double HueValue = 20;
-        public double HueTolerance = 10;
-        public double AreaThreshhold = 0.0002f;
-        public double DilationErotionSize = 0.01f;
-        public int OutputWidth = 900;
-        public int OutputHeight = 600;
-        public double Brightness = 0.3;
+        public double HueValue { get; set; } = 20;
+        public double HueTolerance { get; set; } = 10;
+        public double AreaThreshhold { get; set; } = 0.0002f;
+        public double DilationErotionSize { get; set; } = 0.01f;
+        public int OutputWidth { get; set; } = 900;
+        public int OutputHeight { get; set; } = 600;
+        public double Brightness { get; set; } = 0.3;
     }
 
     public class RecognitionConfiguration
