@@ -64,6 +64,17 @@ public class Locator : IDisposable
         //Cv2.Canny(BinarizedImage, contourImage, 127, 256);
 
         var contours = Cv2.FindContoursAsArray(/*contourImage*/BinarizedImage, RetrievalModes.List, ContourApproximationModes.ApproxNone);
+
+        Array.Sort(contours, (a, b) =>
+        {
+            double diff = Cv2.ContourArea(b) - Cv2.ContourArea(a);
+            if (diff < 0)
+                return -1;
+            if (diff == 0)
+                return 0;
+            return 1;
+        });
+        
         foreach (var contour in contours)
         {
             var conLength = Cv2.ArcLength(contour, true);

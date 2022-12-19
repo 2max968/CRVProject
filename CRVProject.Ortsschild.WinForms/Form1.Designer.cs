@@ -41,20 +41,23 @@
             this.btnBackFrame = new System.Windows.Forms.ToolStripButton();
             this.btnForwardFrame = new System.Windows.Forms.ToolStripButton();
             this.btnForwardSecond = new System.Windows.Forms.ToolStripButton();
+            this.btnSaveOutput = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.pb = new System.Windows.Forms.PictureBox();
+            this.pbOutput = new System.Windows.Forms.PictureBox();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.imgSchilder = new System.Windows.Forms.ImageList(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lblImageInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.pbPlayback = new System.Windows.Forms.ToolStripProgressBar();
-            this.lvSchilder = new System.Windows.Forms.ListView();
-            this.imgSchilder = new System.Windows.Forms.ImageList(this.components);
+            this.tbOutInfo = new System.Windows.Forms.TextBox();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pb)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbOutput)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,7 +75,8 @@
             this.btnBackSecond,
             this.btnBackFrame,
             this.btnForwardFrame,
-            this.btnForwardSecond});
+            this.btnForwardSecond,
+            this.btnSaveOutput});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(834, 25);
@@ -179,6 +183,17 @@
             this.btnForwardSecond.Text = "1 Second Forward";
             this.btnForwardSecond.Click += new System.EventHandler(this.btnForwardSecond_Click);
             // 
+            // btnSaveOutput
+            // 
+            this.btnSaveOutput.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnSaveOutput.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnSaveOutput.Image = global::CRVProject.Ortsschild.WinForms.Properties.Resources.disk;
+            this.btnSaveOutput.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnSaveOutput.Name = "btnSaveOutput";
+            this.btnSaveOutput.Size = new System.Drawing.Size(23, 22);
+            this.btnSaveOutput.Text = "Save Output";
+            this.btnSaveOutput.Click += new System.EventHandler(this.btnSaveOutput_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -191,8 +206,9 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.lvSchilder);
+            this.splitContainer1.Panel2.Controls.Add(this.pbOutput);
             this.splitContainer1.Panel2.Controls.Add(this.propertyGrid1);
+            this.splitContainer1.Panel2.Controls.Add(this.tbOutInfo);
             this.splitContainer1.Size = new System.Drawing.Size(834, 460);
             this.splitContainer1.SplitterDistance = 566;
             this.splitContainer1.TabIndex = 1;
@@ -207,6 +223,17 @@
             this.pb.TabIndex = 0;
             this.pb.TabStop = false;
             // 
+            // pbOutput
+            // 
+            this.pbOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbOutput.Location = new System.Drawing.Point(0, 213);
+            this.pbOutput.Name = "pbOutput";
+            this.pbOutput.Size = new System.Drawing.Size(264, 184);
+            this.pbOutput.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbOutput.TabIndex = 1;
+            this.pbOutput.TabStop = false;
+            this.pbOutput.Click += new System.EventHandler(this.pbOutput_Click);
+            // 
             // propertyGrid1
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -215,6 +242,12 @@
             this.propertyGrid1.Size = new System.Drawing.Size(264, 213);
             this.propertyGrid1.TabIndex = 0;
             this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
+            // 
+            // imgSchilder
+            // 
+            this.imgSchilder.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imgSchilder.ImageSize = new System.Drawing.Size(200, 200);
+            this.imgSchilder.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // statusStrip1
             // 
@@ -238,22 +271,14 @@
             this.pbPlayback.Name = "pbPlayback";
             this.pbPlayback.Size = new System.Drawing.Size(300, 16);
             // 
-            // lvSchilder
+            // tbOutInfo
             // 
-            this.lvSchilder.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lvSchilder.LargeImageList = this.imgSchilder;
-            this.lvSchilder.Location = new System.Drawing.Point(0, 213);
-            this.lvSchilder.Name = "lvSchilder";
-            this.lvSchilder.Size = new System.Drawing.Size(264, 247);
-            this.lvSchilder.SmallImageList = this.imgSchilder;
-            this.lvSchilder.TabIndex = 1;
-            this.lvSchilder.UseCompatibleStateImageBehavior = false;
-            // 
-            // imgSchilder
-            // 
-            this.imgSchilder.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imgSchilder.ImageSize = new System.Drawing.Size(200, 200);
-            this.imgSchilder.TransparentColor = System.Drawing.Color.Transparent;
+            this.tbOutInfo.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tbOutInfo.Location = new System.Drawing.Point(0, 397);
+            this.tbOutInfo.Multiline = true;
+            this.tbOutInfo.Name = "tbOutInfo";
+            this.tbOutInfo.Size = new System.Drawing.Size(264, 63);
+            this.tbOutInfo.TabIndex = 1;
             // 
             // Form1
             // 
@@ -269,9 +294,11 @@
             this.toolStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pb)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbOutput)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -299,7 +326,9 @@
         private ToolStripButton btnOpen;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripProgressBar pbPlayback;
-        private ListView lvSchilder;
         private ImageList imgSchilder;
+        private PictureBox pbOutput;
+        private ToolStripButton btnSaveOutput;
+        private TextBox tbOutInfo;
     }
 }

@@ -8,11 +8,11 @@ namespace CRVProject.Ortsschild.WinForms
     public partial class Form1 : Form
     {
         [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern IntPtr GetParent(IntPtr hWnd);
         [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         ViewMode viewMode = ViewMode.Original;
         VideoCapture? video = null;
@@ -125,6 +125,7 @@ namespace CRVProject.Ortsschild.WinForms
 
             using Locator locator = new Locator(frame);
             locator.Binarize();
+            locator.RunLocator();
 
             var outputSize = pb.Size;
             Cv2.ResizeWindow(cvTitle, outputSize.Width, outputSize.Height);
@@ -145,6 +146,18 @@ namespace CRVProject.Ortsschild.WinForms
                 using Mat rgb = new Mat();
                 Cv2.Merge(new[ ] { red, green, blue }, rgb);
                 dispMat(rgb);
+            }
+
+            if (locator.Ortsschilder.Count > 0 
+                && Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                pbOutput.Image?.Dispose();
+                pbOutput.Image = ImageConverter.Mat2Bitmap(locator.Ortsschilder[0]);
+                (pbOutput.Tag as IDisposable)?.Dispose();
+                pbOutput.Tag = locator.Ortsschilder[0].Clone();
+
+                tbOutInfo.Text = $"Typ: {Classification.Classify(locator.Ortsschilder[0])}\r\n" 
+                    + $"Sharpness: {Classification.CalculateSharpness(locator.Ortsschilder[0])}";
             }
         }
 
@@ -246,6 +259,37 @@ namespace CRVProject.Ortsschild.WinForms
         private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
             showImage();
+        }
+
+        private void btnSaveOutput_Click(object sender, EventArgs e)
+        {
+            if(pbOutput.Image == null)
+            {
+                MessageBox.Show("No image to save", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "PNG|*.png|Jpeg|*.jpg";
+            if(saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                pbOutput.Image.Save(saveFileDialog.FileName);
+            }
+        }
+
+        private void pbOutput_Click(object sender, EventArgs e)
+        {
+            Mat? mat = pbOutput.Tag as Mat;
+            if(mat is not null)
+            {
+                //OutputForm ofrm = new OutputForm(mat);
+                //ofrm.ShowDialog();
+
+                TextRecognition tr = new TextRecognition();
+                string text = tr.Run(mat);
+                tr.Dispose();
+                tbOutInfo.Text = text.Replace("\n", "\r\n");
+            }
         }
     }
 
