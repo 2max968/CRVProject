@@ -1,0 +1,95 @@
+﻿using OpenCvSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CRVProject.Ortsschild
+{
+    public class VideoPlayer
+    {
+        VideoCapture cap;
+        int millisPerFrame;
+        double fps;
+        string title = "Video Player";
+        bool playing = true;
+        int WindowWidth = 800;
+        int WindowHeight = 800;
+        int ImageWidth;
+        int ImageHeight;
+        int OutputWidth = 300;
+        int OutputHeight = 200;
+
+        public VideoPlayer(VideoCapture cap)
+        {
+            this.cap = cap;
+            fps = cap.Fps;
+            millisPerFrame = (int)(1000.0 / fps);
+
+            float w = cap.FrameWidth;
+            float h = cap.FrameHeight;
+            float s1 = WindowWidth / w;
+            float s2 = WindowHeight / 2 / h;
+            float s = Math.Min(s1, s2);
+            ImageWidth = (int)(w * s);
+            ImageHeight = (int)(h * s);
+        }
+
+        public void Run()
+        {
+            Stopwatch stp = new Stopwatch();
+            while(true)
+            {
+                stp.Restart();
+                using Mat mat = new Mat();
+                if (playing)
+                {
+                    cap.Read(mat);
+                    DoFrame(mat);
+                    if (cap.PosFrames >= cap.FrameCount)
+                        cap.PosFrames = 0;
+                }
+                int leftFrametime = millisPerFrame - (int)stp.ElapsedMilliseconds;
+                if (leftFrametime < 1)
+                    leftFrametime = 1;
+                int key = Cv2.WaitKey(leftFrametime);
+                if (key == ' ')
+                    playing = !playing;
+                else if (key == 'p')
+                    cap.PosFrames--;
+                else if (key == 'n')
+                    cap.PosFrames++;
+                if (Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) == 0)
+                    break;
+            }
+
+        }
+
+        public void DoFrame(Mat frame)
+        {
+            using Locator locator = new Locator(frame);
+            locator.RunLocator();
+            using Mat binOutput = new Mat();
+            Cv2.CvtColor(locator.BinarizedImage, binOutput, ColorConversionCodes.GRAY2BGR);
+            Cv2.DrawContours(binOutput, locator.Contours, -1, new Scalar(0, 255, 0), 4);
+
+            Cv2.Resize(frame, frame, new Size(ImageWidth, ImageHeight), 0, 0, InterpolationFlags.Cubic);
+            Cv2.Resize(binOutput, binOutput, new Size(ImageWidth, ImageHeight), 0, 0, InterpolationFlags.Cubic);
+
+            using Mat output = new Mat(ImageHeight * 2, ImageWidth, MatType.CV_8UC3);
+            frame.CopyTo(output[new Rect(0, 0, ImageWidth, ImageHeight)]);
+            binOutput.CopyTo(output[new Rect(0, ImageHeight, ImageWidth, ImageHeight)]);
+
+            if (locator.Ortsschilder.Count > 0)
+            {
+                using Mat schild = new Mat();
+                Cv2.Resize(locator.Ortsschilder[0], schild, new Size(OutputWidth, OutputHeight), 0, 0, InterpolationFlags.Cubic);
+                schild.CopyTo(output[new Rect(0, 0, OutputWidth, OutputHeight)]);
+            }
+
+            Cv2.ImShow(title, output);
+        }
+    }
+}

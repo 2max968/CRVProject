@@ -28,7 +28,9 @@ while (true)
     {
         VideoCapture video = new VideoCapture();
         video.Open(images[selectedImage].FullName);
-        double fps = video.Fps;
+        VideoPlayer player = new VideoPlayer(video);
+        player.Run();
+        /*double fps = video.Fps;
         int frametimeMillis = (int)(1000 / fps);
         string title = Guid.NewGuid().ToString();
 
@@ -64,7 +66,7 @@ while (true)
                 video.PosFrames -= 60;
             if (Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) == 0)
                 break;
-        }
+        }*/
     }
     else
     {
@@ -73,9 +75,6 @@ while (true)
         Util.PixelInfoWindow(image);
 
         locator.RunLocator();
-
-        if (locator.CutoutImage != null)
-            Cv2.ImWrite("cutout.png", locator.CutoutImage);
 
         ImageGridWindow wnd = new ImageGridWindow(3, 1 + (locator.Ortsschilder.Count + 2 / 3));
         wnd.SetImage(0, 0, image);

@@ -53,6 +53,12 @@
       <None Update="Images\Screenshot 2022-10-25 165645.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Images\Vid1.mp4">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\Vid2.mp4">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Letters_DB\!.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
