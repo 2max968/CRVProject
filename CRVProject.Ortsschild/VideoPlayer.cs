@@ -40,12 +40,14 @@ namespace CRVProject.Ortsschild
         public void Run()
         {
             Stopwatch stp = new Stopwatch();
+            bool redraw = false;
             while(true)
             {
                 stp.Restart();
                 using Mat mat = new Mat();
-                if (playing)
+                if (playing || redraw)
                 {
+                    redraw = false;
                     cap.Read(mat);
                     DoFrame(mat);
                     if (cap.PosFrames >= cap.FrameCount)
@@ -58,9 +60,15 @@ namespace CRVProject.Ortsschild
                 if (key == ' ')
                     playing = !playing;
                 else if (key == 'p')
+                {
                     cap.PosFrames--;
+                    redraw = true;
+                }
                 else if (key == 'n')
+                {
                     cap.PosFrames++;
+                    redraw = true;
+                }
                 if (Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) == 0)
                     break;
             }
@@ -87,6 +95,19 @@ namespace CRVProject.Ortsschild
                 using Mat schild = new Mat();
                 Cv2.Resize(locator.Ortsschilder[0], schild, new Size(OutputWidth, OutputHeight), 0, 0, InterpolationFlags.Cubic);
                 schild.CopyTo(output[new Rect(0, 0, OutputWidth, OutputHeight)]);
+                try
+                {
+                    TextRecognition tr = new TextRecognition();
+                    string text = tr.Run(locator.Ortsschilder[0], true);
+                    Cv2.Rectangle(output, new Rect(ImageWidth - 100, 0, 100, 64), new Scalar(0, 0, 0), -1);
+                    Cv2.PutText(output, text, new Point(ImageWidth - 96, 16), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
+                }
+                catch(Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.Message);
+                    Console.ResetColor();
+                }
             }
 
             Cv2.ImShow(title, output);

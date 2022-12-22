@@ -4,6 +4,7 @@ using OpenCvSharp;
 using System.Diagnostics;
 
 Configuration.LoadConfiguration();
+TextRecognition.Init();
 
 DirectoryInfo imageDirectory = new DirectoryInfo("Images");
 if (!imageDirectory.Exists)

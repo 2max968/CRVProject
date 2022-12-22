@@ -286,7 +286,8 @@ namespace CRVProject.Ortsschild.WinForms
                 //ofrm.ShowDialog();
 
                 TextRecognition tr = new TextRecognition();
-                string text = tr.Run(mat);
+                bool ausfahrt = tr.Preprocess(mat);
+                string text = tr.Run(mat, ausfahrt);
                 tr.Dispose();
                 tbOutInfo.Text = text.Replace("\n", "\r\n");
             }
