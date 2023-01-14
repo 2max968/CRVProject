@@ -13,7 +13,7 @@ namespace CRVProject.Ortsschild
         VideoCapture cap;
         int millisPerFrame;
         double fps;
-        string title = "Video Player";
+        string title = "Video Player <space> - Play/Pause; <n> - Next Frame; <p> - Previous Frame; <f> - fast";
         bool playing = true;
         int WindowWidth = 800;
         int WindowHeight = 800;
@@ -41,6 +41,7 @@ namespace CRVProject.Ortsschild
         {
             Stopwatch stp = new Stopwatch();
             bool redraw = false;
+            bool fast = false;
             while(true)
             {
                 stp.Restart();
@@ -50,11 +51,13 @@ namespace CRVProject.Ortsschild
                     redraw = false;
                     cap.Read(mat);
                     DoFrame(mat);
+                    if (!playing)
+                        cap.PosFrames--;
                     if (cap.PosFrames >= cap.FrameCount)
                         cap.PosFrames = 0;
                 }
                 int leftFrametime = millisPerFrame - (int)stp.ElapsedMilliseconds;
-                if (leftFrametime < 1)
+                if (leftFrametime < 1 || fast)
                     leftFrametime = 1;
                 int key = Cv2.WaitKey(leftFrametime);
                 if (key == ' ')
@@ -68,6 +71,10 @@ namespace CRVProject.Ortsschild
                 {
                     cap.PosFrames++;
                     redraw = true;
+                }
+                else if(key == 'f')
+                {
+                    fast = !fast;
                 }
                 if (Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) == 0)
                     break;
@@ -98,9 +105,10 @@ namespace CRVProject.Ortsschild
                 try
                 {
                     TextRecognition tr = new TextRecognition();
-                    string text = tr.Run(locator.Ortsschilder[0], true);
+                    string text = tr.Run(locator.Ortsschilder[0], true, false);
                     Cv2.Rectangle(output, new Rect(ImageWidth - 100, 0, 100, 64), new Scalar(0, 0, 0), -1);
                     Cv2.PutText(output, text, new Point(ImageWidth - 96, 16), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
+                    Console.WriteLine(String.Join(", ", text.Split('\n', '\r').Select(s => $"\"{s}\"")));
                 }
                 catch(Exception ex)
                 {

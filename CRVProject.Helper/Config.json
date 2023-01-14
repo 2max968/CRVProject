@@ -1,6 +1,7 @@
 ﻿{
   "Locator": {
-    "Brightness": 0.3
+    "Brightness": 0.3,
+    "HueTolerance": 5
   },
   "Recognition": {
     

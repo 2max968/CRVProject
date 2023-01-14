@@ -76,6 +76,8 @@ public class Locator : IDisposable
 
             if (approx?.Length == 4 && relArea > AreaThreshhold)
             {
+                
+
                 // Extract sign from image
                 var rectIn = approx.Select(p => new Point2f(p.X, p.Y));
                 rectIn = MakeContourClockwise(rectIn.ToArray());
@@ -113,14 +115,19 @@ public class Locator : IDisposable
             (points[2], points[3]) = (points[3], points[2]);
         }
 
+        int rotations = 0;
         while (true)
         {
             var p1 = points[^1];
             var p2 = points[0];
             var p3 = points[1];
-            if (p1.Y > p2.Y && p2.X < p3.X)
+            var p4 = points[2];
+            if (p1.Y > p2.Y && p2.X < p3.X && p2.Y < p4.Y && p2.X < p4.X)
                 break;
             rotateContour(points);
+            rotations++;
+            if (rotations > 4)
+                break;
         }
 
         return points;

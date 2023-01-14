@@ -101,7 +101,7 @@ namespace CRVProject.Ortsschild
         }
 
 
-        public string Run(Mat image, bool istAusfahrt)
+        public string Run(Mat image, bool istAusfahrt, bool debug)
         {
             this.Image.Dispose();
             this.Image = image.Clone();
@@ -154,7 +154,7 @@ namespace CRVProject.Ortsschild
 
             #endregion
 
-            Console.WriteLine($"Parent finden: {stp.ElapsedMilliseconds} ms");
+            if(debug) Console.WriteLine($"Parent finden: {stp.ElapsedMilliseconds} ms");
             stp.Restart();
 
             #region Bouning Boxen sortieren
@@ -244,7 +244,7 @@ namespace CRVProject.Ortsschild
             Array.Sort(BoundingRectX, lineMask);
 
             #endregion
-            Console.WriteLine($"Boxen sortieren: {stp.ElapsedMilliseconds} ms");
+            if(debug) Console.WriteLine($"Boxen sortieren: {stp.ElapsedMilliseconds} ms");
             stp.Restart();
 
             #region Hauptfunktion Vergleich mit Template
@@ -305,7 +305,7 @@ namespace CRVProject.Ortsschild
                         /*Cv2.ImShow("cutout", temp_otsu_image);
                         Cv2.ImShow("template", temp_template);
                         Cv2.WaitKey();
-                        Console.WriteLine(diff);*/
+                        if(debug) Console.WriteLine(diff);*/
                         switch (letters[j])
                         {
                             //Sonderfälle: für s, S, i, i-punkt ('!') muss die Übereinstimmung über das Seitenverältnis berechnet werden
@@ -351,14 +351,14 @@ namespace CRVProject.Ortsschild
                 }
                 // Gesamtes Wort zusammensetzen
                 correctWord += correctLetter;
-                //Console.WriteLine("correct letter: " + correctLetter);
+                //if(debug) Console.WriteLine("correct letter: " + correctLetter);
                 Cv2.PutText(OtsuImageDraw, correctLetter.ToString(), new OpenCvSharp.Point(boundingRect.X, boundingRect.Y), HersheyFonts.Italic, 1, new Scalar(150, 150, 150));
                 //Cv2.PutText(otsu_image, boundingRect.X.ToString(), new OpenCvSharp.Point(boundingRect.X, boundingRect.Y), HersheyFonts.Italic, 1, new Scalar(150, 150, 150));
                 temp_min = 0;    // resette das temporären Minimum für die nächste Iteration
             }
             #endregion
 
-            Console.WriteLine($"Templates: {stp.ElapsedMilliseconds} ms");
+            if(debug) Console.WriteLine($"Templates: {stp.ElapsedMilliseconds} ms");
             stp.Restart();
 
             #region ende
@@ -415,7 +415,7 @@ namespace CRVProject.Ortsschild
             */
             #endregion
 
-            Console.WriteLine($"Ende: {stp.ElapsedMilliseconds} ms");
+            if(debug) Console.WriteLine($"Ende: {stp.ElapsedMilliseconds} ms");
             stp.Restart();
 
             return finalText;
