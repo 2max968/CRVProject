@@ -8,13 +8,9 @@ namespace CRVProject.Ortsschild;
 public class Locator : IDisposable
 {
     private Mat image;
-    public float AreaThreshhold = 0.0002f;
-    public float DilationErotionSize = 0.01f;
     public List<Mat> Ortsschilder { get; private set; } = new List<Mat>();
-    public List<Point[]> Contours { get; private set; } = new List<Point[]>();
+    public List<Point2f[]> Contours { get; private set; } = new List<Point2f[]>();
     public Mat? BinarizedImage = null;
-    public int OutputWidth = 900;
-    public int OutputHeight = 600;
     public Mat? Corners;
 
     public Locator(Mat image)
@@ -43,6 +39,7 @@ public class Locator : IDisposable
 
     public void RunLocator()
     {
+        var cfg = Configuration.Instance.Locator;
         Stopwatch stp = new Stopwatch();
         stp.Start();
 
@@ -50,7 +47,7 @@ public class Locator : IDisposable
             Binarize();
         
         // Dilate and Erode image to close small gaps in yellow areas
-        int kernelSize = (int)(image.Height * DilationErotionSize);
+        int kernelSize = (int)(image.Height * cfg.DilationErotionSize);
         using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(kernelSize, kernelSize));
         Cv2.Dilate(BinarizedImage, BinarizedImage, kernel);
         Cv2.Erode(BinarizedImage, BinarizedImage, kernel);
@@ -74,22 +71,22 @@ public class Locator : IDisposable
             var relArea = conArea / (image.Width * image.Height);
             var approx = Cv2.ApproxPolyDP(contour, 0.02 * conLength, true);
 
-            if (approx?.Length == 4 && relArea > AreaThreshhold)
+            if (approx?.Length == 4 && relArea > cfg.AreaThreshhold)
             {
                 // Extract sign from image
-                var rectIn = approx.Select(p => new Point2f(p.X, p.Y));
-                rectIn = MakeContourClockwise(rectIn.ToArray());
+                var rectIn = approx.Select(p => new Point2f(p.X, p.Y)).ToArray();
+                rectIn = MakeContourClockwise(rectIn);
                 var rectOut = new Point2f[]
                 {
                     new Point2f(0, 0),
-                    new Point2f(OutputWidth, 0),
-                    new Point2f(OutputWidth, OutputHeight),
-                    new Point2f(0, OutputHeight)
+                    new Point2f(cfg.OutputWidth, 0),
+                    new Point2f(cfg.OutputWidth, cfg.OutputHeight),
+                    new Point2f(0, cfg.OutputHeight)
                 };
                 Mat output = new Mat();
                 Mat transform = Cv2.GetPerspectiveTransform(rectIn, rectOut);
-                Cv2.WarpPerspective(image, output, transform, new Size(OutputWidth, OutputHeight));
-                Contours.Add(approx);
+                Cv2.WarpPerspective(image, output, transform, new Size(cfg.OutputWidth, cfg.OutputHeight));
+                Contours.Add(rectIn);
                 Ortsschilder.Add(output);
             }
         }
@@ -134,5 +131,45 @@ public class Locator : IDisposable
         {
             img?.Dispose();
         }
+    }
+
+    public double[] GetAngles(Point2f[] points)
+    {
+        var angles = new double[points.Length];
+        for(int i = 0; i < points.Length; i++)
+        {
+            var p1 = points[(i - 1 + points.Length) % points.Length];
+            var p2 = points[(i) % points.Length];
+            var p3 = points[(i + 1) % points.Length];
+            
+            var p12 = p2 - p1;
+            var p23 = p3 - p2;
+            var p12_length = p12.DistanceTo(new Point2f(0,0));
+            var p23_length = p23.DistanceTo(new Point2f(0, 0));
+            double prod = Point2f.DotProduct(p12, p23);
+            angles[i] = Math.Acos(prod / (p12_length * p23_length));
+            angles[i] *= 180.0 / Math.PI;
+        }
+        return angles;
+    }
+
+    public (double min, double max, double span) GetAnglesMinMax(Point2f[] points)
+    {
+        var angles = GetAngles(points);
+        var min = angles.Min();
+        var max = angles.Max();
+        var span = max - min;
+        return (min, max, span);
+    }
+
+    public double GetAspectRatio(Point2f[] points)
+    {
+        double width1 = points[1].X - points[0].X;
+        double width2 = points[2].X - points[3].X;
+        double height1 = points[3].Y - points[0].Y;
+        double height2 = points[2].Y - points[1].Y;
+        double width = (width1 + width2) / 2.0;
+        double height = (height1 + height2) / 2.0;
+        return width / height;
     }
 }

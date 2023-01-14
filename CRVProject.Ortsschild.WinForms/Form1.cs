@@ -151,13 +151,18 @@ namespace CRVProject.Ortsschild.WinForms
             if (locator.Ortsschilder.Count > 0 
                 && Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
+                var contour = locator.Contours[0].Select(p => new Point2f(p.X, p.Y)).ToArray();
+                var ang = locator.GetAnglesMinMax(contour);
+                var ratio = locator.GetAspectRatio(contour);
+
                 pbOutput.Image?.Dispose();
                 pbOutput.Image = ImageConverter.Mat2Bitmap(locator.Ortsschilder[0]);
                 (pbOutput.Tag as IDisposable)?.Dispose();
                 pbOutput.Tag = locator.Ortsschilder[0].Clone();
 
                 tbOutInfo.Text = $"Typ: {Classification.Classify(locator.Ortsschilder[0])}\r\n" 
-                    + $"Sharpness: {Classification.CalculateSharpness(locator.Ortsschilder[0])}";
+                    + $"Sharpness: {Classification.CalculateSharpness(locator.Ortsschilder[0])}\r\n"
+                    + $"Angles: [{ang.min}°; {ang.max}°], Ratio: {ratio}";
             }
         }
 

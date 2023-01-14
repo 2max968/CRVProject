@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +19,12 @@ namespace CRVProject.Helper
             {
                 Console.WriteLine($"Warning: File '{path}' does not exist");
                 Instance = new Configuration();
+                var json_text = JsonConvert.SerializeObject(Instance, Formatting.Indented);
+                File.WriteAllText(path, json_text);
+                return;
             }
             string json = File.ReadAllText(path);
-            var config = Newtonsoft.Json.JsonConvert.DeserializeObject<Configuration>(json);
+            var config = JsonConvert.DeserializeObject<Configuration>(json);
             if (config == null)
             {
                 Console.WriteLine($"Warning: Cant deserialize file '{path}'");

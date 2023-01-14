@@ -19,9 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Config.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="Replacements.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
