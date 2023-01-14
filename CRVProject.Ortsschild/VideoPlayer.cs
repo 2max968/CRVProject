@@ -88,7 +88,9 @@ namespace CRVProject.Ortsschild
             locator.RunLocator();
             using Mat binOutput = new Mat();
             Cv2.CvtColor(locator.BinarizedImage, binOutput, ColorConversionCodes.GRAY2BGR);
-            Cv2.DrawContours(binOutput, locator.Contours, -1, new Scalar(0, 255, 0), 4);
+            Cv2.DrawContours(binOutput, locator.Contours
+                .Select(ps => ps.Select(p => p.ToPoint())),
+                -1, new Scalar(0, 255, 0), 4);
 
             Cv2.Resize(frame, frame, new Size(ImageWidth, ImageHeight), 0, 0, InterpolationFlags.Cubic);
             Cv2.Resize(binOutput, binOutput, new Size(ImageWidth, ImageHeight), 0, 0, InterpolationFlags.Cubic);
