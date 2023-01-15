@@ -73,11 +73,18 @@ public class Locator : IDisposable
 
             if (approx?.Length == 4 && relArea > cfg.AreaThreshhold)
             {
-                
-
                 // Extract sign from image
                 var rectIn = approx.Select(p => new Point2f(p.X, p.Y)).ToArray();
                 rectIn = MakeContourClockwise(rectIn);
+
+                double ratio = GetAspectRatio(rectIn);
+                var angles = GetAnglesMinMax(rectIn);
+                //Console.WriteLine($"[{angles.min}°; {angles.max}°; {ratio}]");
+                if (angles.min < 70 || angles.max > 100)
+                    continue;
+                if (ratio > 1.7 || ratio < 1.3)
+                    continue;
+
                 var rectOut = new Point2f[]
                 {
                     new Point2f(0, 0),
@@ -171,10 +178,10 @@ public class Locator : IDisposable
 
     public double GetAspectRatio(Point2f[] points)
     {
-        double width1 = points[1].X - points[0].X;
-        double width2 = points[2].X - points[3].X;
-        double height1 = points[3].Y - points[0].Y;
-        double height2 = points[2].Y - points[1].Y;
+        double width1 = Point2f.Distance(points[1], points[0]);
+        double width2 = Point2f.Distance(points[2], points[3]);
+        double height1 = Point2f.Distance(points[3], points[0]);
+        double height2 = Point2f.Distance(points[2], points[1]);
         double width = (width1 + width2) / 2.0;
         double height = (height1 + height2) / 2.0;
         return width / height;

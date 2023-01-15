@@ -56,6 +56,9 @@
       <None Update="Images\C0644.MP4">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Images\C0645.MP4">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Images\Maua-26102015-01.jpg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
