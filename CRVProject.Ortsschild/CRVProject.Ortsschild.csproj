@@ -36,7 +36,7 @@
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
       <None Update="Images\20221020_143059.jpg">
-        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Images\20221024_184324.jpg">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>

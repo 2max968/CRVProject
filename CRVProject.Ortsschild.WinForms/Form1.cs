@@ -292,7 +292,7 @@ namespace CRVProject.Ortsschild.WinForms
 
                 TextRecognition tr = new TextRecognition();
                 bool ausfahrt = tr.Preprocess(mat);
-                string text = tr.Run(mat, ausfahrt);
+                string text = tr.Run(mat, ausfahrt, out double _, true);
                 tr.Dispose();
                 tbOutInfo.Text = text.Replace("\n", "\r\n");
             }

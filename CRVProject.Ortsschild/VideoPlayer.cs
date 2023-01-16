@@ -144,7 +144,7 @@ namespace CRVProject.Ortsschild
                 cap.PosFrames = tmpPos;
                 //using var l = new Locator(resMat);
                 //l.RunLocator();
-                Cv2.Resize(resMat, resMat, new Size(800, 600), 0, 0, InterpolationFlags.Cubic);
+                Cv2.Resize(resMat, resMat, new Size(800, 450), 0, 0, InterpolationFlags.Cubic);
                 Cv2.ImShow("Result", resMat);
                 while (Cv2.GetWindowProperty("Result", WindowPropertyFlags.Visible) != 0)
                     Cv2.WaitKey(100);
