@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,33 +22,56 @@ namespace CRVProject.Ortsschild
         public Mat hsv = new Mat();
         public static void Init()
         {
-            string letters = "abcdefghijklmnopqrstuvwxyz!";
-            foreach (var letter in letters)
+            string Letters = CRVProject.Helper.Configuration.Instance.Recognition.Letters;
+            foreach (var letter in Letters)
             {
                 string fname1 = "letters_DB/" + ("" + letter).ToLower() + "_klein.png";
                 string fname2 = "letters_DB/" + ("" + letter).ToUpper() + ".png";
+                bool IsLetter = false;
 
+                if ("!1234567890^".Contains(("" + letter)) == false)
+                {
+                    IsLetter = true;
+                }
+                Mat mat1 = new Mat();
                 if (letter != 'i' && letter != '!')
                 {
-                    Mat mat1 = Cv2.ImRead(fname1).Resize(new OpenCvSharp.Size(64, 64));
+                    if (IsLetter) //Wenn es ein Buchstabe ist, einfach ganz normal einlesen, wenn nicht, leere Matrix Mat mat1 = new Mat();
+                    {
+                        mat1 = Cv2.ImRead(fname1).Resize(new OpenCvSharp.Size(64, 64));
+                        Cv2.CvtColor(mat1, mat1, ColorConversionCodes.RGB2GRAY);
+                    }
+
                     Mat mat2 = Cv2.ImRead(fname2).Resize(new OpenCvSharp.Size(64, 64));
-                    //mat1.ConvertTo(mat1, MatType.CV_8UC1);
-                    //mat2.ConvertTo(mat2, MatType.CV_8UC1);
-                    Cv2.CvtColor(mat1, mat1, ColorConversionCodes.RGB2GRAY);
                     Cv2.CvtColor(mat2, mat2, ColorConversionCodes.RGB2GRAY);
-                    templates.Add(letter, (mat1, mat2));
+                    if (IsLetter)
+                    {
+                        templates.Add(letter, (mat1, mat2));   // bsp. a A, b B, c C ...
+                    }
+                    else
+                    {
+                        templates.Add(letter, (mat2, mat1));   // bsp. 3 [0x0], 4 [0x0], 5 [0x0]
+                    }
                 }
                 else
                 {
+                    // nicht resizen
+                    if (IsLetter)
+                    {
+                        mat1 = Cv2.ImRead(fname1);
+                        Cv2.CvtColor(mat1, mat1, ColorConversionCodes.RGB2GRAY);
+                    }
 
-                    Mat mat1 = Cv2.ImRead(fname1);
                     Mat mat2 = Cv2.ImRead(fname2);
-                    Cv2.CvtColor(mat1, mat1, ColorConversionCodes.RGB2GRAY);
                     Cv2.CvtColor(mat2, mat2, ColorConversionCodes.RGB2GRAY);
-                    // mat1.ConvertTo(mat1, MatType.CV_8UC1);
-                    // mat2.ConvertTo(mat2, MatType.CV_8UC1);
-
-                    templates.Add(letter, (mat1, mat2));
+                    if (IsLetter)
+                    {
+                        templates.Add(letter, (mat1, mat2));   // bsp. a A, b B, c C ...
+                    }
+                    else
+                    {
+                        templates.Add(letter, (mat2, mat1));   // bsp. 3 [0x0], 4 [0x0], 5 [0x0]
+                    }
                 }
             }
         }
@@ -66,19 +90,14 @@ namespace CRVProject.Ortsschild
             this.Image.Dispose();
             this.Image = image.Clone();
             Cv2.CvtColor(image, GrayscaleImage, ColorConversionCodes.BGR2GRAY);
-            //Cv2.ImShow("grayscale", GrayscaleImage);
-            //Cv2.WaitKey();
             Cv2.Threshold(GrayscaleImage, OtsuImage, 0, 255, ThresholdTypes.Otsu);
-            //Cv2.ImShow("Otsu Image", OtsuImage);
-            //Cv2.WaitKey();
             Cv2.Canny(OtsuImage, CannyImage, 0, 255);
-            //Cv2.ImShow("Canny Image", CannyImage);
-            //Cv2.WaitKey();
-            double rho = 1;
-            double theta = Math.PI / 180;
-            int threshold = 10;
-            double minLength = 200; // minimale linienlänge
-            double maxLengthGap = 10; // maximale lücke
+
+            double rho = CRVProject.Helper.Configuration.Instance.Recognition.rho;
+            double theta = CRVProject.Helper.Configuration.Instance.Recognition.theta;
+            int threshold = CRVProject.Helper.Configuration.Instance.Recognition.threshold;
+            double minLength = CRVProject.Helper.Configuration.Instance.Recognition.minLength; // minimale Linienlänge
+            double maxLengthGap = CRVProject.Helper.Configuration.Instance.Recognition.maxLengthGap; // maximale Lücke
 
             LineSegmentPoint[] houghLines = Cv2.HoughLinesP(CannyImage, rho, theta, threshold, minLength, maxLengthGap);
             for (int i = 0; i < houghLines.Length; i++)
@@ -87,21 +106,17 @@ namespace CRVProject.Ortsschild
                 if (houghLines[i].P1.Y > image.Height / 3 && houghLines[i].P1.Y < 2 * image.Height / 3 && houghLines[i].P2.Y > image.Height / 3 && houghLines[i].P2.Y < 2 * image.Height / 3)
                 {
                     Console.WriteLine("ist Ausfahrtsschild");
-                    //Cv2.ImShow("Hough Lines", CannyImage);
-                    //Cv2.WaitKey();
-                    return true;  // es liegt eine horizontale linie im mittleren vertikalen drittel des bildes vor was nur bei einem geteilten schild vorkommen kann
+
+                    return true;  // es liegt eine horizontale linie im mittleren vertikalen drittel des bildes vor was nur bei einer Ortsausfahrtstafel vorkommen kann
                 }
             }
 
-
             Console.WriteLine("ist KEIN Ausfahrtsschild");
-            //Cv2.ImShow("Hough Lines", CannyImage);
-            //Cv2.WaitKey();
             return false;
         }
 
 
-        public string Run(Mat image, bool istAusfahrt, bool debug)
+        public string Run(Mat image, bool istAusfahrt, out double textConfidence, bool debug)
         {
             this.Image.Dispose();
             this.Image = image.Clone();
@@ -113,6 +128,7 @@ namespace CRVProject.Ortsschild
                 GrayscaleImage = Cv2.Split(hsv)[2];
                 Cv2.Threshold(GrayscaleImage, OtsuImage, 0, 255, ThresholdTypes.Otsu);
                 Cv2.Dilate(OtsuImage, OtsuImage, new Mat(), null, 2);
+                Cv2.Erode(OtsuImage, OtsuImage, new Mat(), null, 2);
             }
             else
             {
@@ -127,28 +143,28 @@ namespace CRVProject.Ortsschild
 
             #region Parent finden
             // Häufigster Parent ist der um Alle Buchstaben
-            OpenCvSharp.Point[][] contours;
+            OpenCvSharp.Point[][] Contours;
             HierarchyIndex[] hierarchy;
-            Cv2.FindContours(OtsuImage, out contours, out hierarchy, mode: RetrievalModes.CComp, method: ContourApproximationModes.ApproxSimple);
+            Cv2.FindContours(OtsuImage, out Contours, out hierarchy, mode: RetrievalModes.CComp, method: ContourApproximationModes.ApproxSimple);
 
-            int[] hierarchy_parents = new int[hierarchy.Length];
-            int num_parents = 0;
-            int found_parent = -1;
+            int[] HierarchyParents = new int[hierarchy.Length];
+            int NumBoxes = CRVProject.Helper.Configuration.Instance.Recognition.NumBoxes;
+            int FoundParent = CRVProject.Helper.Configuration.Instance.Recognition.FoundParent;
 
-            // parents von structs in array
+            // Parents von Structs in Array
             for (int i = 0; i < hierarchy.Length; i++)
             {
-                hierarchy_parents[i] = hierarchy[i].Parent;
+                HierarchyParents[i] = hierarchy[i].Parent;
             }
 
             // finde den am häufigsten auftretenden Parent
             for (int i = 0; i < hierarchy.Length; i++)
             {
                 // Bsp. 1 mit 103287501982 vergleichen und zählen, 0 mit 103287501982 vergleichen und zählen, 3 mit 103287501982 vergleichen ...
-                if (hierarchy_parents.Count(n => n == hierarchy_parents[i]) > num_parents && hierarchy_parents[i] != -1)   // da -1 sehr oft vorkommt
+                if (HierarchyParents.Count(n => n == HierarchyParents[i]) > NumBoxes && HierarchyParents[i] != -1)   // da -1 sehr oft vorkommt
                 {
-                    num_parents = hierarchy_parents.Count(n => n == hierarchy_parents[i]);
-                    found_parent = hierarchy_parents[i];
+                    NumBoxes = HierarchyParents.Count(n => n == HierarchyParents[i]);  //Anzahl der gefundenen Buchstaben und Bounding Boxen = Anzahl des häufigsten gemeinsamen Parents
+                    FoundParent = HierarchyParents[i];
                 }
             }
 
@@ -159,37 +175,39 @@ namespace CRVProject.Ortsschild
 
             #region Bouning Boxen sortieren
             // Sortieren von contorus von links nach rechts
-            string letters = "abcdefghijklmnopqrstuvwxyz!";
-            double temp_min = 0;
-            double diff = 100;
-            string correctWord = ""; // Zeile 1 Buchstaben auf dem Schild
-            char correctLetter = '\0';
+            string Letters = CRVProject.Helper.Configuration.Instance.Recognition.Letters;
+            double TempMin = CRVProject.Helper.Configuration.Instance.Recognition.TempMin;
+            double Diff = CRVProject.Helper.Configuration.Instance.Recognition.Diff;
 
-            double[] BoundingRectX = new double[num_parents];
-            double[] BoundingRectX_temp = new double[num_parents];
-            double[] BoundingRectY = new double[num_parents];
-            double[] BoundingRectHeight = new double[num_parents];
-            int[] BoundingRectIdx = new int[num_parents];
-            double[] lineMask = new double[num_parents];
+            string CorrectWord = CRVProject.Helper.Configuration.Instance.Recognition.CorrectWord;
+            char CorrectLetter = CRVProject.Helper.Configuration.Instance.Recognition.CorrectLetter;
+            double Confidence = CRVProject.Helper.Configuration.Instance.Recognition.Confidence;
 
-            int counter_k = 0;
+            double[] BoundingRectX = new double[NumBoxes];
+            double[] BoundingRectX_temp = new double[NumBoxes];
+            double[] BoundingRectY = new double[NumBoxes];
+            double[] BoundingRectHeight = new double[NumBoxes];
+            int[] BoundingRectIdx = new int[NumBoxes];
+            double[] LineMask = new double[NumBoxes];
+
+            int CounterK = CRVProject.Helper.Configuration.Instance.Recognition.CounterK;
             // Bounding Boxen Zeichnen und Soriterung vorbereiten
-            for (int i = 0; i < contours.Length; i++)
+            for (int i = 0; i < Contours.Length; i++)
             {
                 // Wenn eine Bounding Box die richtinge Anzahl an Parents hat (found_parents) ist es ein Buchstabe
-                if (hierarchy[i].Parent == found_parent)
+                if (hierarchy[i].Parent == FoundParent)
                 {
-                    var contour = contours[i];
-                    var boundingRect = Cv2.BoundingRect(contour);
+                    var Contour = Contours[i];
+                    var BoundingRect = Cv2.BoundingRect(Contour);
                     // Zeiche Bounding Boxen in das otsu_image
-                    Cv2.Rectangle(OtsuImageDraw, new OpenCvSharp.Point(boundingRect.X, boundingRect.Y), new OpenCvSharp.Point(boundingRect.X + boundingRect.Width - 1, boundingRect.Y + boundingRect.Height - 1), new Scalar(150, 150, 150), 1);
-                    BoundingRectX[counter_k] = boundingRect.X;
-                    BoundingRectY[counter_k] = boundingRect.Y;
-                    BoundingRectHeight[counter_k] = boundingRect.Height;
+                    Cv2.Rectangle(OtsuImageDraw, new OpenCvSharp.Point(BoundingRect.X, BoundingRect.Y), new OpenCvSharp.Point(BoundingRect.X + BoundingRect.Width - 1, BoundingRect.Y + BoundingRect.Height - 1), new Scalar(150, 150, 150), 1);
+                    BoundingRectX[CounterK] = BoundingRect.X;
+                    BoundingRectY[CounterK] = BoundingRect.Y;
+                    BoundingRectHeight[CounterK] = BoundingRect.Height;
 
                     // index im contour array für die Kontur eines Buchstaben, also nur die die man braucht
-                    BoundingRectIdx[counter_k] = i;
-                    counter_k++;
+                    BoundingRectIdx[CounterK] = i;
+                    CounterK++;
                 }
             }
 
@@ -206,28 +224,28 @@ namespace CRVProject.Ortsschild
             //(4. BoundingRectIdx so wie BoundingRectX
             // Am Ende soll sich die Reihenfolge auf BoundingRectX beziehen also alles von links nach rechts
             // Notwending, da sich die Array.Sort funktion bei gleichen keys nicht merkt welcher wert zu welchem Key gehört
-
-            for (int i = 0; i < num_parents; i++)
+            double epsilon = CRVProject.Helper.Configuration.Instance.Recognition.epsilon; // Eine Sehr kleine Zahl
+            for (int i = 0; i < NumBoxes; i++)
             {
-                BoundingRectX[i] += i * 0.000001; // Um gleiche Zahlen beim sortieren zu unterscheiden und eindeutig zuzuordnen
+                BoundingRectX[i] += i * epsilon; // Um gleiche Zahlen beim sortieren zu unterscheiden und eindeutig zuzuordnen
             }
 
             BoundingRectX.CopyTo(BoundingRectX_temp, 0);
-
             Array.Sort(BoundingRectX_temp, BoundingRectIdx);
             Array.Sort(BoundingRectHeight);
-            double medianHeight = 0;
+            double medianHeight = CRVProject.Helper.Configuration.Instance.Recognition.medianHeight;
+            double MedianMul = CRVProject.Helper.Configuration.Instance.Recognition.MedianMul; // Vergrößerung des thresholds für Ausfahrtsschilder, da diese Zeilenweise bearbeitet werden
 
             if (istAusfahrt == true)
             {
-                medianHeight = BoundingRectHeight[(int)(BoundingRectHeight.Length / 2)] * 1.3; // In diesem Fall gibt es nur eine Zeile also macht es keinen Sinn zu differenzieren
+                medianHeight = BoundingRectHeight[(int)(BoundingRectHeight.Length / 2)] * MedianMul; // Ist Ausfahrtsschild, gibt also nur eine Zeile Text (mit evtl KM anzeige)
             }
             else
             {
                 medianHeight = BoundingRectHeight[(int)(BoundingRectHeight.Length / 2)]; // Median Höhe der Boundignboxen
             }
             // Maske, die kennzeichnet zu welcher Zeile welcher Buchstabe gehört z. B 000001111 hallowelt
-            int maskVar = 0;
+            int maskVar = CRVProject.Helper.Configuration.Instance.Recognition.maskVar;
 
             Array.Sort(BoundingRectY, BoundingRectX);
             // Y- Werte Differenzieren, sobald eine Differez größer als der Median ist, ist das ein Zeilenumbruch auf dem Ortsschild
@@ -238,10 +256,10 @@ namespace CRVProject.Ortsschild
                 {
                     maskVar++;
                 }
-                lineMask[i] = maskVar;
+                LineMask[i] = maskVar;
             }
 
-            Array.Sort(BoundingRectX, lineMask);
+            Array.Sort(BoundingRectX, LineMask);
 
             #endregion
             if(debug) Console.WriteLine($"Boxen sortieren: {stp.ElapsedMilliseconds} ms");
@@ -249,100 +267,136 @@ namespace CRVProject.Ortsschild
 
             #region Hauptfunktion Vergleich mit Template
             //string temp_char;
-            for (int i = 0; i < num_parents; i++)
+            for (int i = 0; i < NumBoxes; i++)
             {
                 // "wrong" order 52492
                 int k = BoundingRectIdx[i];
                 // Nochmal Konturen berechnen, jetzt in richtiger Reihenfolge
-                var contour = contours[k];
-                var boundingRect = Cv2.BoundingRect(contour);
+                var contour = Contours[k];
+                var BoundingRect = Cv2.BoundingRect(contour);
                 // Bounding rect wird zu groß selektiert also kleiner machen
-                boundingRect = new Rect(new OpenCvSharp.Point(boundingRect.X + 1, boundingRect.Y + 1), new OpenCvSharp.Size(boundingRect.Width - 2, boundingRect.Height - 2));
-
-                for (int caseLU = 0; caseLU <= 1; caseLU++) // Lower Case Upper Cas
+                BoundingRect = new Rect(new OpenCvSharp.Point(BoundingRect.X + 1, BoundingRect.Y + 1), new OpenCvSharp.Size(BoundingRect.Width - 2, BoundingRect.Height - 2));
+                for (int CaseLU = 0; CaseLU <= 1; CaseLU++) // Lower Case Upper Cas
                 {
-                    for (int j = 0; j < letters.Length; j++)
+                    for (int j = 0; j < Letters.Length; j++)
                     {
                         // Buchstabe aus der Datenbank
                         Mat temp_template = new Mat();
 
                         // Lower Case Upper Case
-                        if (caseLU == 0)
+                        if (CaseLU == 0)
                         {
-                            //temp_char = letters[j] + "_klein";
-                            temp_template = templates[letters[j]].klein;
+                            // hier kommt das programm nur hin, wenn es sich in der zweiten Spalte des Dictionaries befindet
+                            // sprich die Spalte mit den Kleinbuchstaben, aber ohne Zahlen und Sonderzeichen (Leere Matrix)
+
+                            temp_template = templates[Letters[j]].klein;
 
                         }
                         else
                         {
-                            //temp_char = letters[j].ToString();
-                            temp_template = templates[letters[j]].gross;
+                            if ("!1234567890↑".Contains(("" + Letters[j])) == false)
+                            {
+                                temp_template = templates[Letters[j]].gross;
+                            }
+                            else
+                            {
+                                // damit Zahlen und Sonderzeichen nicht doppelt überprüft werden
+                                break;
+                            }
                         }
-
+                        /*if(BreakFlag == true)
+                        {
+                            break;
+                        }*/
                         // Otsu Bild zuschneiden
-                        Mat temp_otsu_image = OtsuImage[boundingRect];
-                        Mat tempOtsuImageOriginal = new Mat();
-                        temp_otsu_image.CopyTo(tempOtsuImageOriginal);
+                        Mat TempOtsuImage = OtsuImage[BoundingRect];
+                        Mat TempOtsuImageOriginal = new Mat();
+                        TempOtsuImage.CopyTo(TempOtsuImageOriginal);
 
-                        // ratio wird nur in den switch cases benötigt, wird aber schon vorhere definiert, damit es durch das resizen der Bilder nicht überschrieben werden sowie die resize aktionen nicht zweimal durchgeführt werden müssen
-                        double ratio = Math.Abs((double)tempOtsuImageOriginal.Width / (double)tempOtsuImageOriginal.Height);
+                        // ratio wird nur in den switch cases benötigt, wird aber schon vorher definiert, damit es durch das resizen der Bilder nicht überschrieben wird sowie die resize aktionen nicht zweimal durchgeführt werden müssen
+                        double ratio = Math.Abs((double)TempOtsuImageOriginal.Width / (double)TempOtsuImageOriginal.Height);
+                        double iRatioLBoundLCase = CRVProject.Helper.Configuration.Instance.Recognition.iRatioLBoundLCase;
+                        double iRatioUBoundLCase = CRVProject.Helper.Configuration.Instance.Recognition.iRatioUBoundLCase;
+                        double iRatioLBoundUCase = CRVProject.Helper.Configuration.Instance.Recognition.iRatioLBoundUCase;
+                        double iRatioUBoundUCase = CRVProject.Helper.Configuration.Instance.Recognition.iRatioUBoundUCase;
+                        double ExclamThresh1 = CRVProject.Helper.Configuration.Instance.Recognition.ExclamThres1;
+                        double ExclamThresh2 = CRVProject.Helper.Configuration.Instance.Recognition.ExclamThres2;
+                        double DiffThresh = CRVProject.Helper.Configuration.Instance.Recognition.DiffThresh;
+                        double MedianHeightMul = CRVProject.Helper.Configuration.Instance.Recognition.MedianHeightMul;
                         // Verleichen mit template
                         // OtsuImage auf Größe des Templates bringen
-                        temp_otsu_image = temp_otsu_image.Resize(temp_template.Size());
+                        TempOtsuImage = TempOtsuImage.Resize(temp_template.Size());
 
-                        // nochmal otsu da nach interpolation wieder graustufen auftreten
-                        Cv2.Threshold(temp_otsu_image, temp_otsu_image, 0, 255, ThresholdTypes.Otsu);
+                        // nochmal otsu weil nach interpolation wieder graustufen auftreten
+                        Cv2.Threshold(TempOtsuImage, TempOtsuImage, 0, 255, ThresholdTypes.Otsu);
 
                         //Ergebnis matrix
                         Mat res = new Mat(temp_template.Size(), MatType.CV_8UC1);
 
                         //Vergleiche Buchstaben mit zugeschnittenem Bild
-                        Cv2.Compare(temp_otsu_image, temp_template, res, CmpType.EQ);
+                        Cv2.Compare(TempOtsuImage, temp_template, res, CmpType.EQ);
 
                         //Übereinstimmung in Prozent, division durch 255 um Zähler zu normieren
-                        diff = Cv2.Sum(res).Val0 / (res.Width * res.Height) / 255;
+                        Diff = Cv2.Sum(res).Val0 / (res.Width * res.Height) / 255;
 
                         /*Cv2.ImShow("cutout", temp_otsu_image);
                         Cv2.ImShow("template", temp_template);
                         Cv2.WaitKey();
-                        if(debug) Console.WriteLine(diff);*/
-                        switch (letters[j])
+                        if(debug) Console.WriteLine(diff);
+                        if(debug) Console.WriteLine(correctLetter);*/
+                        switch (Letters[j])
                         {
                             //Sonderfälle: für s, S, i, i-punkt ('!') muss die Übereinstimmung über das Seitenverältnis berechnet werden
                             case '!':
-                                if (tempOtsuImageOriginal.Height / medianHeight < 0.5)
+                                if (TempOtsuImageOriginal.Height / medianHeight < ExclamThresh1 && istAusfahrt == false)
                                 {
-                                    correctLetter = '!';
+
+                                    CorrectLetter = '!';
+                                    TempMin = Diff;
                                 }
-                                break;
-                            case 'i':
-                                if (caseLU == 0 && 0.18 < ratio && ratio < 0.25 && diff > 0.8)
+                                else if (TempOtsuImageOriginal.Height / medianHeight < ExclamThresh2 && istAusfahrt == true) //leicht härtere Bedignung für
+                                                                                                                             //Ausfahrtsschilder, da diese ja an
+                                                                                                                             //der mittelinie geteilt werden und somit nur
+                                                                                                                             //eine Zeile text besitzen, was bedeutet, dass
+                                                                                                                             //mehrere buchstaben kleiner als 50% vom median sein
+                                                                                                                             //können, bedingt durch die übergroßen Pfeile und die
+                                                                                                                             //zweite sonderzeile die nur hier auf tritt und aus sehr
+                                                                                                                             //kleinen Buchstaben besteht
                                 {
-                                    correctLetter = 'i';
-                                    // beende beide schleifen bzw. füge den Buchstaben sofort hinzu
-                                    j = letters.Length;
-                                    caseLU = 1;
-                                }
-                                else if (caseLU == 1 && 0.11 < ratio && ratio < 0.17 && diff > 0.8)
-                                {
-                                    correctLetter = 'I';
-                                    // beende beide schleifen bzw. füge den Buchstaben sofort hinzu
-                                    j = letters.Length;
-                                    caseLU = 1;
+                                    CorrectLetter = '!';
+                                    TempMin = Diff;
                                 }
 
                                 break;
-                            default:
-                                if (diff > temp_min)
+                            case 'i':
+                                if (CaseLU == 0 && iRatioLBoundLCase < ratio && ratio < iRatioUBoundLCase && Diff > DiffThresh)
                                 {
-                                    temp_min = diff;
-                                    if (caseLU == 0)
+                                    CorrectLetter = 'i';
+                                    TempMin = Diff;
+                                    // beende beide schleifen bzw. füge den Buchstaben sofort hinzu
+                                    j = Letters.Length;
+                                    CaseLU = 1;
+                                }
+                                else if (CaseLU == 1 && iRatioLBoundUCase < ratio && ratio < iRatioUBoundUCase && Diff > DiffThresh)
+                                {
+                                    CorrectLetter = 'I';
+                                    TempMin = Diff;
+                                    // beende beide schleifen bzw. füge den Buchstaben sofort hinzu
+                                    j = Letters.Length;
+                                    CaseLU = 1;
+                                }
+                                break;
+                            default:
+                                if (Diff > TempMin)
+                                {
+                                    TempMin = Diff;
+                                    if (CaseLU == 0)
                                     {
-                                        correctLetter = letters[j];
+                                        CorrectLetter = Letters[j];
                                     }
-                                    else if (caseLU == 1 && tempOtsuImageOriginal.Height > medianHeight * 0.95)
+                                    else if (CaseLU == 1 && TempOtsuImageOriginal.Height > medianHeight * MedianHeightMul)
                                     {
-                                        correctLetter = letters[j].ToString().ToUpper()[0]; // Großbuchstaben erkennen
+                                        CorrectLetter = Letters[j].ToString().ToUpper()[0]; // Großbuchstaben erkennen
                                     }
                                 }
                                 break;
@@ -350,12 +404,18 @@ namespace CRVProject.Ortsschild
                     }
                 }
                 // Gesamtes Wort zusammensetzen
-                correctWord += correctLetter;
+                //if(debug) Console.WriteLine("Wahrscheinlichkeit fuer '" + correctLetter + "' beträgt " + TempMin);
+                //if(debug) Console.WriteLine(TempMin);
+                CorrectWord += CorrectLetter;
+                Confidence += TempMin; //Wahrscheinlichkeit für korrekten Buchstaben
                 //if(debug) Console.WriteLine("correct letter: " + correctLetter);
-                Cv2.PutText(OtsuImageDraw, correctLetter.ToString(), new OpenCvSharp.Point(boundingRect.X, boundingRect.Y), HersheyFonts.Italic, 1, new Scalar(150, 150, 150));
+                Cv2.PutText(OtsuImageDraw, CorrectLetter.ToString(), new OpenCvSharp.Point(BoundingRect.X, BoundingRect.Y), HersheyFonts.Italic, 1, new Scalar(150, 150, 150));
                 //Cv2.PutText(otsu_image, boundingRect.X.ToString(), new OpenCvSharp.Point(boundingRect.X, boundingRect.Y), HersheyFonts.Italic, 1, new Scalar(150, 150, 150));
-                temp_min = 0;    // resette das temporären Minimum für die nächste Iteration
+                TempMin = 0;    // resette das temporären Minimum für die nächste Iteration
             }
+            Confidence = Confidence / NumBoxes;
+            if(debug) Console.WriteLine("Wahrscheinlickeit: " + Confidence);
+
             #endregion
 
             if(debug) Console.WriteLine($"Templates: {stp.ElapsedMilliseconds} ms");
@@ -368,11 +428,11 @@ namespace CRVProject.Ortsschild
             // Maske auf das Wort anwenden und wörter trennen sowie Zeilen zuordnen
             for (int line = 0; line <= maskVar; line++)
             {
-                for (int i = 0; i < correctWord.Length; i++)
+                for (int i = 0; i < CorrectWord.Length; i++)
                 {
-                    if (lineMask[i] == line)
+                    if (LineMask[i] == line)
                     {
-                        seperateWords[line] += correctWord[i];
+                        seperateWords[line] += CorrectWord[i];
                     }
                 }
             }
@@ -399,25 +459,12 @@ namespace CRVProject.Ortsschild
                 for (int i = 0; i < words.Length - 1; i++)
                     finalText = finalText.Replace(words[i], words.Last());
             }
-
-            /* To do:
-                * Confusionmatrix
-                * Parameter auslagern, alle außerhalb des programmes als globale variablen, keine Zahlen im code
-                * Zweite Zeile soll auch erkannt werden können
-                * Als kleines Bild den Ortsnamen schreiben, in anderem Schriftformat
-                * Als video Auf der Leinwand sichtbarkeit überprüfen
-                * 
-                * 
-                * Alle Bounding Boxen und alle Buchstaben auf die gleiche Größe bringen
-                * 
-                * präsentation
-                * 12 min + Video präsentation 4 bis 5 min + Fragen Bis Ende Januar
-            */
             #endregion
 
             if(debug) Console.WriteLine($"Ende: {stp.ElapsedMilliseconds} ms");
             stp.Restart();
 
+            textConfidence = Confidence;
             return finalText;
         }
     }

@@ -11,6 +11,7 @@ namespace CRVProject.Ortsschild
     public class VideoPlayer
     {
         VideoCapture cap;
+        string filename = "";
         int millisPerFrame;
         double fps;
         string title = "Video Player <space> - Play/Pause; <n> - Next Frame; <p> - Previous Frame; <f> - fast";
@@ -21,10 +22,12 @@ namespace CRVProject.Ortsschild
         int ImageHeight;
         int OutputWidth = 300;
         int OutputHeight = 200;
+        TextMemory memory = new TextMemory();
 
-        public VideoPlayer(VideoCapture cap)
+        public VideoPlayer(VideoCapture cap, string filename)
         {
             this.cap = cap;
+            this.filename = filename;
             fps = cap.Fps;
             millisPerFrame = (int)(1000.0 / fps);
 
@@ -76,6 +79,14 @@ namespace CRVProject.Ortsschild
                 {
                     fast = !fast;
                 }
+                else if(key == 's')
+                {
+                    string fname = $"{DateTime.Now.ToString("yy.MM.dd_hh.mm.ss")} {filename}cap.png";
+                    using Mat capture = new Mat();
+                    cap.Read(capture);
+                    cap.PosFrames--;
+                    Cv2.ImWrite(fname, capture);
+                }
                 if (Cv2.GetWindowProperty(title, WindowPropertyFlags.Visible) == 0)
                     break;
             }
@@ -107,17 +118,36 @@ namespace CRVProject.Ortsschild
                 try
                 {
                     TextRecognition tr = new TextRecognition();
-                    string text = tr.Run(locator.Ortsschilder[0], true, false);
+                    string text = tr.Run(locator.Ortsschilder[0], true, out double confidence, false);
                     Cv2.Rectangle(output, new Rect(ImageWidth - 100, 0, 100, 64), new Scalar(0, 0, 0), -1);
                     Cv2.PutText(output, text, new Point(ImageWidth - 96, 16), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
-                    Console.WriteLine(String.Join(", ", text.Split('\n', '\r').Select(s => $"\"{s}\"")));
+                    Console.WriteLine("[" + Math.Round(confidence * 100) + "%]" + String.Join(", ", text.Split('\n', '\r').Select(s => $"\"{s}\"")));
+
+                    memory.PushEntry(cap.PosFrames / cap.Fps, confidence, text, cap.PosFrames);
                 }
                 catch(Exception ex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    /*Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(ex.Message);
-                    Console.ResetColor();
+                    Console.ResetColor();*/
                 }
+            }
+
+            var result = memory.GetResult(cap.PosFrames / cap.Fps);
+            if (result is not null)
+            {
+                Console.WriteLine("=====> " + result.Text);
+                int tmpPos = cap.PosFrames;
+                cap.PosFrames = result.FramePos;
+                using Mat resMat = new Mat();
+                cap.Read(resMat);
+                cap.PosFrames = tmpPos;
+                //using var l = new Locator(resMat);
+                //l.RunLocator();
+                Cv2.Resize(resMat, resMat, new Size(800, 600), 0, 0, InterpolationFlags.Cubic);
+                Cv2.ImShow("Result", resMat);
+                while (Cv2.GetWindowProperty("Result", WindowPropertyFlags.Visible) != 0)
+                    Cv2.WaitKey(100);
             }
 
             Cv2.ImShow(title, output);

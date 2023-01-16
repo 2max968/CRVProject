@@ -29,7 +29,7 @@ while (true)
     {
         VideoCapture video = new VideoCapture();
         video.Open(images[selectedImage].FullName);
-        VideoPlayer player = new VideoPlayer(video);
+        VideoPlayer player = new VideoPlayer(video, images[selectedImage].Name);
         player.Run();
         /*double fps = video.Fps;
         int frametimeMillis = (int)(1000 / fps);

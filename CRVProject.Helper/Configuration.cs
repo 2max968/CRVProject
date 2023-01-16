@@ -47,6 +47,31 @@ namespace CRVProject.Helper
 
     public class RecognitionConfiguration
     {
-
+        public string Letters { get; set; } = "abcdefghijklmnopqrstuvwxyz!1234567890^";
+        public double rho { get; set; } = 1;
+        public double theta { get; set; } = Math.PI / 180;
+        public int threshold { get; set; } = 10;
+        public double minLength { get; set; } = 200;
+        public double maxLengthGap { get; set; } = 10;
+        public int NumBoxes { get; set; } = 0;
+        public int FoundParent { get; set; } = -1;
+        public double TempMin { get; set; } = 0;
+        public double Diff { get; set; } = 100;
+        public string CorrectWord { get; set; } = "";
+        public char CorrectLetter { get; set; } = '\0';
+        public double Confidence { get; set; } = 0;
+        public int CounterK { get; set; } = 0;
+        public double epsilon { get; set; } = 0.000001;
+        public double medianHeight { get; set; } = 0;
+        public double MedianMul { get; set; } = 1.1;
+        public int maskVar { get; set; } = 0;
+        public double iRatioLBoundLCase = 0.18;
+        public double iRatioUBoundLCase = 0.25;
+        public double iRatioLBoundUCase = 0.11;
+        public double iRatioUBoundUCase = 0.17;
+        public double ExclamThres1 { get; set; } = 0.5;
+        public double ExclamThres2 { get; set; } = 0.3;
+        public double DiffThresh { get; set; } = 0.8;
+        public double MedianHeightMul { get; set; } = 0.95;
     }
 }
