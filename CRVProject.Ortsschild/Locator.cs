@@ -28,12 +28,15 @@ public class Locator : IDisposable
         double hueMin = hue - hueTolerance;
         double hueMax = hue + hueTolerance;
 
-
         using Mat hsv = new Mat();
+        // Bild von BGR in HSV konvertieren und konvertiertes Bild in 'hsv' abspeichern
         Cv2.CvtColor(image, hsv, ColorConversionCodes.BGR2HSV);
+        // Mittelwerte für Hue, Saturation und Value bestimmen
         var meanValues = Cv2.Mean(hsv);
+        // Mindesthelligkeit bestimmen, die mindesthelligkeit ist abhängig vom Mittelwert von Value
         double minValue = meanValues.Val3 * Configuration.Instance.Locator.Brightness;
         BinarizedImage = new Mat();
+        // Bild nach Farbe binarisieren, damit gelbe Bereiche hervorgehoben werden
         Cv2.InRange(hsv,
             new Scalar(hueMin, 150, minValue),
             new Scalar(hueMax, 256, 256),
@@ -42,21 +45,27 @@ public class Locator : IDisposable
 
     public void RunLocator()
     {
+        // Konfigurationswerte in 'cfg' abspeichern, um später weniger Text zu benötigen
         var cfg = Configuration.Instance.Locator;
+        // Mit einer Stoppuhr die Verarbeitungszeit messen
         Stopwatch stp = new Stopwatch();
         stp.Start();
 
+        // Falls nich kein binarisiertes Bild vorhanden ist, wird zuerst die Funktion 'Binarize()' aufgerufen
         if (BinarizedImage == null)
             Binarize();
         
-        // Dilate and Erode image to close small gaps in yellow areas
+        // Bild erweitern und Erodieren. Dadurch werden kleine Lücken in den gelben Bereichen geschlossen
+        // Da rechteckige Flächen gesucht werden, wird ein Quadratischer Filterkern verwendet
         int kernelSize = (int)(image.Height * cfg.DilationErotionSize);
         using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(kernelSize, kernelSize));
         Cv2.Dilate(BinarizedImage, BinarizedImage, kernel);
         Cv2.Erode(BinarizedImage, BinarizedImage, kernel);
 
-        var contours = Cv2.FindContoursAsArray(/*contourImage*/BinarizedImage, RetrievalModes.List, ContourApproximationModes.ApproxNone);
+        // Konturen im binarisierten Bild suchen
+        var contours = Cv2.FindContoursAsArray(BinarizedImage, RetrievalModes.List, ContourApproximationModes.ApproxNone);
 
+        // Die gefundenen Konturen werden nach ihrer Fläche absteigend sortiert.
         Array.Sort(contours, (a, b) =>
         {
             double diff = Cv2.ContourArea(b) - Cv2.ContourArea(a);
