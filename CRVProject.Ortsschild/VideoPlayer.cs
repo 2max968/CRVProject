@@ -118,12 +118,14 @@ namespace CRVProject.Ortsschild
                 try
                 {
                     TextRecognition tr = new TextRecognition();
-                    string text = tr.Run(locator.Ortsschilder[0], true, out double confidence, false);
+                    bool isAusfahrt = tr.Preprocess(locator.Ortsschilder[0], false);
+                    string text = tr.Run(locator.Ortsschilder[0], isAusfahrt, out double confidence, false);
                     Cv2.Rectangle(output, new Rect(ImageWidth - 100, 0, 100, 64), new Scalar(0, 0, 0), -1);
                     Cv2.PutText(output, text, new Point(ImageWidth - 96, 16), HersheyFonts.HersheyPlain, 1, new Scalar(255, 255, 255));
-                    Console.WriteLine("[" + Math.Round(confidence * 100) + "%]" + String.Join(", ", text.Split('\n', '\r').Select(s => $"\"{s}\"")));
 
-                    memory.PushEntry(cap.PosFrames / cap.Fps, confidence, text, cap.PosFrames);
+                    double size = Cv2.ContourArea(locator.Contours[0]) / (frame.Width * frame.Height);
+                    Console.WriteLine($"[{(isAusfahrt ? 'A' : 'E')}][{Math.Round(confidence * 100)}%][{Math.Round(size * 100)}%]" + String.Join(", ", text.Split('\n', '\r').Select(s => $"\"{s}\"")));
+                    memory.PushEntry(cap.PosFrames / cap.Fps, confidence, text, cap.PosFrames, size, isAusfahrt);
                 }
                 catch(Exception ex)
                 {
@@ -136,7 +138,7 @@ namespace CRVProject.Ortsschild
             var result = memory.GetResult(cap.PosFrames / cap.Fps);
             if (result is not null)
             {
-                Console.WriteLine("=====> " + result.Text);
+                Console.WriteLine("==> " + (result.Ausfahrt ? "Ausfahrt" : "Einfahrt") + ":\n" + result.Text);
                 int tmpPos = cap.PosFrames;
                 cap.PosFrames = result.FramePos;
                 using Mat resMat = new Mat();

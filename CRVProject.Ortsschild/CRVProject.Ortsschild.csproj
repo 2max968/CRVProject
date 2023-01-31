@@ -65,16 +65,28 @@
       <None Update="Images\C0645.MP4.sfk">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
+      <None Update="Images\index.jpg">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </None>
       <None Update="Images\Maua-26102015-01.jpg">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
       <None Update="Images\Ortschild_2-1.mp4">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
+      <None Update="Images\Präsv2.mp4">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Images\Screenshot 2022-10-25 165645.png">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
       <None Update="Images\teaser-news-carl-nolte-technik-corona-normalitaet.jpg">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\test.jpg">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </None>
+      <None Update="Images\testimage.jpg">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
       <None Update="Images\Vid1.mp4">

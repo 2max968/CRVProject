@@ -85,7 +85,7 @@ namespace CRVProject.Ortsschild
         }
 
 
-        public bool Preprocess(Mat image)
+        public bool Preprocess(Mat image, bool debug)
         {
             this.Image.Dispose();
             this.Image = image.Clone();
@@ -105,13 +105,13 @@ namespace CRVProject.Ortsschild
                 Cv2.Line(CannyImage, houghLines[i].P1, houghLines[i].P2, new Scalar(150, 150, 150));
                 if (houghLines[i].P1.Y > image.Height / 3 && houghLines[i].P1.Y < 2 * image.Height / 3 && houghLines[i].P2.Y > image.Height / 3 && houghLines[i].P2.Y < 2 * image.Height / 3)
                 {
-                    Console.WriteLine("ist Ausfahrtsschild");
+                    if(debug) Console.WriteLine("ist Ausfahrtsschild");
 
                     return true;  // es liegt eine horizontale linie im mittleren vertikalen drittel des bildes vor was nur bei einer Ortsausfahrtstafel vorkommen kann
                 }
             }
 
-            Console.WriteLine("ist KEIN Ausfahrtsschild");
+            if (debug) Console.WriteLine("ist KEIN Ausfahrtsschild");
             return false;
         }
 

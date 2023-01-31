@@ -10,16 +10,17 @@ namespace CRVProject.Ortsschild
     {
         double maxTimeout = 0.5;
         double minInScreen = 0.5;
+        double AreaThreshhold = 0.03;
 
         List<TextEntry> entries = new List<TextEntry>();
         
-        public void PushEntry(double timestamp, double confidence, string text, int framePos)
+        public void PushEntry(double timestamp, double confidence, string text, int framePos, double size, bool ausfahrt)
         {
             if(entries.Count > 0 && timestamp - entries.Last().Timestamp >= maxTimeout)
             {
                 entries.Clear();
             }
-            entries.Add(new TextEntry(timestamp, confidence, text, framePos));
+            entries.Add(new TextEntry(timestamp, confidence, text, framePos, size, ausfahrt));
         }
 
         public TextEntry? GetResult(double currentTime)
@@ -34,9 +35,9 @@ namespace CRVProject.Ortsschild
                 double duration = entries.Last().Timestamp - entries.First().Timestamp;
                 if(duration > minInScreen)
                 {
-                    var bestResult = entries.First();
+                    TextEntry? bestResult = null;
                     foreach (var result in entries)
-                        if (result.Confidence > bestResult.Confidence)
+                        if ((bestResult == null || result.Confidence > bestResult.Confidence) && result.Size > AreaThreshhold)
                             bestResult = result;
                     entries.Clear();
                     return bestResult;
@@ -53,13 +54,17 @@ namespace CRVProject.Ortsschild
         public double Confidence;
         public string Text;
         public int FramePos;
+        public double Size;
+        public bool Ausfahrt;
 
-        public TextEntry(double timestamp, double confidence, string text, int framePos)
+        public TextEntry(double timestamp, double confidence, string text, int framePos, double size, bool ausfahrt)
         {
             Timestamp = timestamp;
             Confidence = confidence;
             Text = text;
             FramePos = framePos;
+            Size = size;
+            Ausfahrt = ausfahrt;
         }
     }
 }
