@@ -20,12 +20,15 @@ public class Locator : IDisposable
 
     public void Binarize()
     {
+        // Hue und Hue-Toleranz aus der Konfigurationsdatei laden
         double hue = Configuration.Instance.Locator.HueValue;
         double hueTolerance = Configuration.Instance.Locator.HueTolerance;
 
-        // Binarize image to filter all yellow areas
+        // Grenzwerte für Hue bestimmen
         double hueMin = hue - hueTolerance;
         double hueMax = hue + hueTolerance;
+
+
         using Mat hsv = new Mat();
         Cv2.CvtColor(image, hsv, ColorConversionCodes.BGR2HSV);
         var meanValues = Cv2.Mean(hsv);
